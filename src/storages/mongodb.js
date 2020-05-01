@@ -1,13 +1,11 @@
+const config = require('config');
 const mongoose = require('mongoose');
 
-const connectionOptions = {
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-};
+const connection = config.get('db.connection');
+const options = config.get('db.options');
 
 function init() {
-  mongoose.connect('mongodb://localhost/baby-gear', connectionOptions);
+  mongoose.connect(connection, options);
 
   mongoose.connection.on('error', (error) => {
     console.error('error', error);

@@ -1,0 +1,25 @@
+{
+  "api": {
+    "port": 3000
+  },
+  "db": {
+    "connection": "mongodb://localhost/baby-gear",
+    "options": {
+      "useCreateIndex": true,
+      "useNewUrlParser": true,
+      "useUnifiedTopology": true
+    }
+  },
+  "jwt": {
+    "options": {
+      "expiresIn": 300
+    }
+  },
+  "validation": {
+    "options": {
+      "abortEarly": true,
+      "allowUnknown": true,
+      "convert": false
+    }
+  }
+}
