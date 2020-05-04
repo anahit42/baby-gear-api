@@ -1,4 +1,4 @@
-# Contributing to mongoose-schemas
+# Contributing to baby-gear-api
 
 ## Code Contributions
 
