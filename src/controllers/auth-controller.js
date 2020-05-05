@@ -27,9 +27,10 @@ async function login (req, res, next) {
       });
     }
 
-    const token = await JWT.sign({ id: user.id, email: user.email }, jwtSecret, jwtOptions);
+    const token = await JWT.sign({ _id: user._id, email: user.email }, jwtSecret, jwtOptions);
 
     return res.status(200).json({
+      _id: user._id,
       email,
       token
     });
@@ -38,6 +39,26 @@ async function login (req, res, next) {
   }
 }
 
+async function register (req, res, next) {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+
+    const  passwordHash = await CryptoLib.hashPassword(password);
+
+    await UserModel.create({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash
+    });
+
+    return res.status(200).json({ email });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
-  login
+  login,
+  register
 };
