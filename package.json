@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "description": "API for Baby Gear Shop",
   "main": "src/index.js",
+  "pre-commit": [
+    "precommit"
+  ],
   "scripts": {
+    "precommit": "./node_modules/eslint/bin/eslint.js ./src",
+    "lint": "./node_modules/eslint/bin/eslint.js ./src --fix",
     "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -26,5 +31,9 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.10"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "pre-commit": "^1.2.2"
   }
 }

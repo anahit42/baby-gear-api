@@ -10,7 +10,7 @@ function validateCreateUser (req, res, next) {
 
   if (error) {
     const details = error.details.reduce((acc, detail) => {
-      return `${acc} ${detail.message}`
+      return `${acc} ${detail.message}`;
     }, '');
 
     return next(new ValidationError(details));

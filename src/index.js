@@ -26,6 +26,7 @@ app.use((req, res, next) => {
   return next(new NotFoundError('Path not found.'));
 });
 
+// eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
   if (error.customError) {
     return res.status(error.status).json({
