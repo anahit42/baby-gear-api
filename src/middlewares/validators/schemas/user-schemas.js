@@ -1,6 +1,6 @@
 const Joi = require('@hapi/joi');
 
-const createUserSchema = Joi.object({
+const registerUserSchema = Joi.object({
   body: Joi.object({
     firstName: Joi.string().trim().max(100).required(),
     lastName: Joi.string().trim().max(100).trim().required(),
@@ -10,5 +10,5 @@ const createUserSchema = Joi.object({
 });
 
 module.exports = {
-  createUserSchema
+  registerUserSchema
 };

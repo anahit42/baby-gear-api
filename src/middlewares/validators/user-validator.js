@@ -5,8 +5,8 @@ const validationOptions = config.get('validation.options');
 const { ValidationError } = require('../../errors');
 const { UserSchemas } = require('./schemas');
 
-function validateCreateUser (req, res, next) {
-  const { error } = UserSchemas.createUserSchema.validate(req, validationOptions);
+function validateRegisterUser (req, res, next) {
+  const { error } = UserSchemas.registerUserSchema.validate(req, validationOptions);
 
   if (error) {
     const details = error.details.reduce((acc, detail) => {
@@ -20,5 +20,5 @@ function validateCreateUser (req, res, next) {
 }
 
 module.exports = {
-  validateCreateUser
+  validateRegisterUser
 };
