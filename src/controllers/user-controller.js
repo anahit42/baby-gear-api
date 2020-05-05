@@ -1,16 +1,16 @@
-const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const config = require('config');
 
 const jwt = config.get('jwt');
 
 const { UserModel } = require('../models');
+const CryptoLib = require('../libs/crypto-lib');
 
 async function createUser (req, res, next) {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    const  passwordHash = await bcrypt.hash(password, 10);
+    const  passwordHash = await CryptoLib.hashPassword(password);
 
     await UserModel.create({
       firstName,

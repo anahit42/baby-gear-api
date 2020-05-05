@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const config = require('config');
 
@@ -6,6 +5,7 @@ const jwtSecret = config.get('jwt.secret');
 const jwtOptions = config.get('jwt.options');
 
 const { UserModel } = require('../models');
+const CryptoLib = require('../libs/crypto-lib');
 
 async function login (req, res, next) {
   try {
@@ -19,7 +19,7 @@ async function login (req, res, next) {
       });
     }
 
-    const matches = await bcrypt.compare(password, user.password);
+    const matches = await CryptoLib.comparePassword(password, user.password);
 
     if (!matches) {
       return res.status(404).json({
