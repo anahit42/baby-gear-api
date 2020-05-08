@@ -27,7 +27,7 @@ async function login (req, res, next) {
       });
     }
 
-    const token = await JWT.sign({ _id: user._id, email: user.email }, jwtSecret, jwtOptions);
+    const token = await JWT.sign({ _id: user._id, email: user.email, role: user.role }, jwtSecret, jwtOptions);
 
     return res.status(200).json({
       _id: user._id,

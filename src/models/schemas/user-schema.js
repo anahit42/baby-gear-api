@@ -5,7 +5,11 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   firstName: String,
   lastName: String,
-  role: String,
+  role: {
+    type: String,
+    enum: ['admin', 'user'],
+    default: 'user'
+  },
   email: {
     type: String,
     index: true,
@@ -13,6 +17,14 @@ const UserSchema = new Schema({
     required: true
   },
   password: String,
-});
+  mobilePhone: String,
+  image: String,
+  address: {
+    zipCode: String,
+    street: String,
+    country: String,
+    city: String
+  }
+}, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = UserSchema;
