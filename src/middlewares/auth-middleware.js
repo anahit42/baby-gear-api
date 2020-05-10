@@ -1,6 +1,7 @@
 const JWT = require('jsonwebtoken');
 const config = require('config');
 const jwtSecret = config.get('jwt.secret');
+const { MissingAuthorizationHeaderError } = require('../errors');
 
 async function authorize (req, res, next) {
   try {
@@ -8,7 +9,7 @@ async function authorize (req, res, next) {
 
     if (!authorization) {
       // throw custom NotAuthorizedError
-      throw Error('Bad auth token');
+      throw MissingAuthorizationHeaderError();
     }
 
     req.userData = await JWT.verify(authorization, jwtSecret);

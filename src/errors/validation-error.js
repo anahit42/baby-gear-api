@@ -1,10 +1,11 @@
 const CustomError = require('./custom-error');
+const HttpStatus = require('http-status-codes');
 
 class ValidationError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: 400
+      status: HttpStatus.BAD_REQUEST
     });
 
   }

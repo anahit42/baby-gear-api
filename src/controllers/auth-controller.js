@@ -1,35 +1,33 @@
-const JWT = require('jsonwebtoken');
-const config = require('config');
-
-const jwtSecret = config.get('jwt.secret');
-const jwtOptions = config.get('jwt.options');
+const HttpStatus = require('http-status-codes');
 
 const { UserModel } = require('../models');
 const CryptoLib = require('../libs/crypto-lib');
+const TokenLib = require('../libs/token-lib');
 
 async function login (req, res, next) {
   try {
     const { email, password } = req.body;
 
+    const userNotFoundError = `${UserModel.collection.collectionName} ${HttpStatus.NOT_FOUND}`;
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({
-        error: 'User not found'
+      return res.status(HttpStatus.NOT_FOUND).json({
+        error: userNotFoundError
       });
     }
 
     const matches = await CryptoLib.comparePassword(password, user.password);
 
     if (!matches) {
-      return res.status(404).json({
-        error: 'User not found'
+      return res.status(HttpStatus.NOT_FOUND).json({
+        error: userNotFoundError
       });
     }
 
-    const token = await JWT.sign({ _id: user._id, email: user.email, role: user.role }, jwtSecret, jwtOptions);
+    const token = await TokenLib.createToken();
 
-    return res.status(200).json({
+    return res.status(HttpStatus.OK).json({
       _id: user._id,
       email,
       token
@@ -41,18 +39,29 @@ async function login (req, res, next) {
 
 async function register (req, res, next) {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName,
+      lastName,
+      role,
+      email,
+      password,
+      mobilePhone,
+      image,
+      address} = req.body;
 
     const  passwordHash = await CryptoLib.hashPassword(password);
 
     await UserModel.create({
       firstName,
       lastName,
+      role,
       email,
-      password: passwordHash
+      password: passwordHash,
+      mobilePhone,
+      image,
+      address
     });
 
-    return res.status(200).json({ email });
+    return res.status(HttpStatus.OK).json({ email });
   } catch (error) {
     return next(error);
   }

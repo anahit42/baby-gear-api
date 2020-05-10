@@ -1,13 +1,13 @@
 const CustomError = require('./custom-error');
 const HttpStatus = require('http-status-codes');
 
-class NotFoundError extends CustomError {
+class MissingAuthorizationHeaderError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: HttpStatus.NotFoundError
+      status: HttpStatus.UNAUTHORIZED
     });
   }
 }
 
-module.exports = NotFoundError;
+module.exports = MissingAuthorizationHeaderError;

@@ -1,5 +1,6 @@
 const JWT = require('jsonwebtoken');
 const config = require('config');
+const HttpStatus = require('http-status-codes');
 
 const jwt = config.get('jwt');
 
@@ -13,8 +14,8 @@ async function getUser (req, res, next) {
     const decoded = await JWT.verify(authorization, jwt.secret);
 
     if (userId !== decoded.id.toString()) {
-      return res.status(401).json({
-        error: 'Not Authorized'
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        error: HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED)
       });
     }
 
@@ -22,7 +23,7 @@ async function getUser (req, res, next) {
       password: 0
     });
 
-    return res.status(200).json({
+    return res.status(HttpStatus.OK).json({
       user
     });
   } catch (error) {
