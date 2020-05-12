@@ -16,7 +16,9 @@ const { NotFoundError } = require('./errors');
 
 const app = express();
 
-const { authRouter, userRouter } = require('./routers');
+const {
+  authRouter, categoryRouter, favoriteRouter, orderRouter, productRouter, userRouter
+} = require('./routers');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -24,6 +26,11 @@ app.use(bodyParser.json());
 app.use('/auth', authRouter);
 
 app.use(AuthMiddleware.authorize);
+
+app.use('/categories', categoryRouter);
+app.use('/favorites', favoriteRouter);
+app.use('/orders', orderRouter);
+app.use('/products', productRouter);
 app.use('/users', userRouter);
 
 app.use((req, res, next) => {
