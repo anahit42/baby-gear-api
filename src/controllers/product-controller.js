@@ -1,4 +1,15 @@
-// eslint-disable-next-line no-unused-vars
 const { ProductModel } = require('../models');
 
-module.exports = {};
+const createProduct = async (req,res,next)=> {
+  try {
+    const productBody = req.body;
+    const product = await ProductModel.create(productBody);
+    return res.status(200).json(product);
+  }catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createProduct
+};
