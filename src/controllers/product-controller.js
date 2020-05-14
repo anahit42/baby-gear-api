@@ -1,4 +1,19 @@
-// eslint-disable-next-line no-unused-vars
 const { ProductModel } = require('../models');
 
-module.exports = {};
+async function getProduct (req, res, next) {
+  const { productId } = req.params;
+
+  try {
+    const product = await ProductModel.findOne({ _id: productId });
+
+    return res.status(200).json({
+      product
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = {
+  getProduct,
+};
