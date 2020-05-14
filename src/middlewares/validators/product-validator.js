@@ -15,6 +15,21 @@ const validateCreateProduct = (req, res, next) => {
   return next();
 };
 
+
+const validateUpdateProduct = (req, res, next) => {
+  const { error } = ProductSchemas.productsUpdateSchema.validate(req, validationOptions);
+  if (error) {
+    const details = error.details.reduce((acc, detail) => {
+      return `${acc} ${detail.message}`;
+    }, '');
+
+    return next(new ValidationError(details));
+  }
+  return next();
+};
+
+
 module.exports = {
-  validateCreateProduct
+  validateCreateProduct,
+  validateUpdateProduct
 };

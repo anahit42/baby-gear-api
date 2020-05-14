@@ -22,11 +22,37 @@ const productsCreateSchema = Joi.object({
     country: string.trim(),
     images: array.items(string.trim()),
     issueDate: date.greater('1-1-1974').prefs({ convert: true }),
-    subCategories:Joi.objectId()
+    subCategories:array.items(Joi.objectId())
   })
 });
 
+const productsUpdateSchema = Joi.object({
+  body: Joi.object({
+    name: string.trim().max(200),
+    description: string.trim(),
+    price: string.trim(),
+    properties:Joi.object({
+      color:string.trim(),
+      size:string.trim(),
+      weight:string.trim(),
+      ageFrom:number.integer(),
+      ageTo:number.integer(),
+    }),
+    customProperties:Joi.object(),
+    condition:string.valid('new', 'very good','good', 'acceptable').trim().max(15),
+    status: string.valid('active', 'deleted', 'not-available').trim().max(20),
+    quantity:number.integer(),
+    brand: string.trim(),
+    country: string.trim(),
+    images: array.items(string.trim()),
+    issueDate: date.greater('1-1-1974').prefs({ convert: true }),
+    subCategories:array.items(Joi.objectId())
+  })
+});
+
+
 module.exports = {
-  productsCreateSchema
+  productsCreateSchema,
+  productsUpdateSchema
 };
 
