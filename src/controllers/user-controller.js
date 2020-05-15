@@ -69,7 +69,7 @@ async function uploadProfilePic (req, res, next) {
     });
 
     if (url) {
-      await UserModel.updateOne({ _id: userId }, { image: url })
+      await UserModel.findByIdAndUpdate(userId, { image: url })
         .then(() => {
           return res.status(200).json({
             image: url,
