@@ -106,3 +106,5 @@ dist
 node_modules/
 .idea/
 .env
+config/default.json
+package.json

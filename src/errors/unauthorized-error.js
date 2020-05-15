@@ -1,7 +1,7 @@
 const CustomError = require('./custom-error');
 const HttpStatus = require('http-status-codes');
 
-class MissingAuthorizationHeaderError extends CustomError {
+class UnAuthorizedError extends CustomError {
   constructor(message) {
     super({
       message,
@@ -10,4 +10,4 @@ class MissingAuthorizationHeaderError extends CustomError {
   }
 }
 
-module.exports = MissingAuthorizationHeaderError;
+module.exports = UnAuthorizedError;

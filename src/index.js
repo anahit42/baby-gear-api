@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const config = require('config');
 const express = require('express');
 
+const HttpStatus = require('http-status-codes');
+
 const mongodb = require('./storages/mongodb');
 mongodb.init();
 
@@ -26,8 +28,13 @@ app.use('/auth', authRouter);
 app.use(AuthMiddleware.authorize);
 app.use('/users', userRouter);
 
+const multer = require('multer');
+app.use(multer({
+  dest: 'uploads/'
+}).single('file'));
+
 app.use((req, res, next) => {
-  return next(new NotFoundError('Path not found.'));
+  return next(new NotFoundError(HttpStatus.NOT_FOUND));
 });
 
 // eslint-disable-next-line no-unused-vars
@@ -41,16 +48,16 @@ app.use((error, req, res, next) => {
   }
 
   if (error.name === 'SyntaxError') {
-    return res.status(400).json({
+    return res.status(HttpStatus.BAD_REQUEST).json({
       success: false,
-      status: 400,
+      status: HttpStatus.BAD_REQUEST,
       message: error.message
     });
   }
 
-  return res.status(500).json({
+  return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
     success: false,
-    status: 500,
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'The server encountered an internal error. Try again later.'
   });
 });
