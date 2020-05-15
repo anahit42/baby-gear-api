@@ -33,6 +33,24 @@ async function getUser(req, res, next) {
   }
 }
 
+async function getUsers(req, res, next) {
+  try {
+    const users = await UserModel.find({}).select({
+      password: 0,
+      email: 0,
+      mobilePhone: 0,
+      address: 0
+    }).limit(2).skip(2);
+
+    return res.status(200).json({
+      users
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getUser,
+  getUsers
 };
