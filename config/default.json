@@ -23,6 +23,6 @@
     }
   },
   "image": {
-    "validMimes": [ "image/jpeg", "image/png", "image/svg+xml" ]
+    "validMimes": [ "image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp" ]
   }
 }

@@ -1,64 +1,77 @@
 const config = require('config');
-const fs = require('fs');
 const FileType = require('file-type');
-
-const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
-const validMimes = config.get('image.validMimes');
+const Promise = require('bluebird');
 
 const { ProductModel } = require('../models');
 const S3Lib = require('../libs/s3-lib');
 const NotFoundError = require('../errors/not-found-error');
-const ValidationError = require('../errors/validation-error');
+const ForbiddenError = require('../errors/forbidden-error');
 
 
 async function uploadImages(req, res, next) {
   try {
-    // Check product exists in db
-    const { id } = req.params;
-    const isProductExists = await ProductModel.exists({ _id: id });
+    const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
+
+    const { productId } = req.params;
+    const { _id } = req.userData;
+    const product = await ProductModel.findOne({ _id: productId }).select('userId');
+    let distFileKeys = [];
     let urls = [];
 
-    if (! isProductExists) {
-      return next(new NotFoundError('Product not found'));
+    // Check product exists in db
+    if (!product) {
+      throw new NotFoundError('Product not found');
+    }
+
+    // Validation for self product update
+    if (product.userId.toString() !== _id) {
+      throw new ForbiddenError('You don\'t have permission to do that');
     }
 
     // Loop each file
-    req.files.forEach(async (file) => {
-      // Get file buffer and type, check accessible file types.
-      const fileBody = fs.createReadStream(file.path);
-      const fileType = await FileType.fromStream(fileBody);
+    await Promise.map(req.files, async (file) => {
+      try {
+        const fileType = await FileType.fromBuffer(file.buffer);
 
-      if(!validMimes.includes(fileType.mime)) {
-      // TODO: maybe handle another way
-        return next(new ValidationError('Please send valid files'));
+        // Upload file to cloud
+        const data = await S3Lib.uploadFileToS3({
+          bucket: bucketName,
+          key: accessKeyId,
+          secret: secretAccessKey,
+          fileBuffer: file.buffer,
+          fileMimeType: fileType.mime,
+          distFilePath: `${productId}/${file.originalname}`
+        });
+        distFileKeys.push(data.key);
+
+        const url = S3Lib.getSignedUrl({
+          bucket: bucketName,
+          key: accessKeyId,
+          secret: secretAccessKey,
+          distFileKey: data.Key || data.key,
+          mimeType: fileType.mime,
+        });
+        urls.push(url);
+
+      } catch (error) {
+        console.log(error);
       }
+    });
 
-      // Upload files to cloud
-      const data = await S3Lib.uploadFileToS3({
-        bucket: bucketName,
-        key: accessKeyId,
-        secret: secretAccessKey,
-        fileBuffer: fileBody,
-        fileMimeType: fileType.mime,
-        distFilePath: file.originalname
-      });
+    // Save image urls in db
+    const updateData = await ProductModel.updateOne({ _id: productId }, { $addToSet: { images: distFileKeys } });
 
-      const url = await S3Lib.getSignedUrl({
-        bucket: bucketName,
-        key: accessKeyId,
-        secret: secretAccessKey,
-        distFileKey: data.Key || data.key,
-        mimeType: fileType.mime,
-      });
+    if (!updateData.ok) {
+      throw new Error('Something went wrong, please try again.');
+    }
 
-      urls.push(url);
+    return res.status(200).json({
+      message: 'Success',
+      imageUrls: urls
     });
   } catch(error) {
-    console.log(error);
+    return next(error);
   }
-
-  // Save urls in db
-
 }
 
 module.exports = {

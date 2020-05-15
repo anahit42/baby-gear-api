@@ -1,30 +1,21 @@
 const multer = require('multer');
 const config = require('config');
 
+const ValidationError = require('../errors/validation-error');
+
 function imageFileFilter(req, file, cb) {
   const validMimes = config.get('image.validMimes');
 
   if(!validMimes.includes(file.mimetype)) {
-    cb(null, false);
+    cb(new ValidationError('Only images are allowed'), false);
   }
-
   cb(null, true);
 }
 
-const imageStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'images/');
-  },
-
-  filename: function (req, file, cb) {
-    file.originalname = file.originalname.split(' ').join('_');
-
-    cb(null, `${Date.now()}_${file.originalname}`);
-  }
-});
+var storage = multer.memoryStorage();
 
 const uploadImage = multer({
-  storage: imageStorage,
+  storage,
   fileFilter: imageFileFilter
 });
 
