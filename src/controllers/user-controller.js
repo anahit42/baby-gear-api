@@ -65,7 +65,7 @@ async function uploadProfilePic (req, res, next) {
       key: accessKey,
       secret: secretKey,
       distFileKey: data.Key || data.key,
-      mimeType: file.mimetype,
+      mimeType: fileType.mime,
     });
 
     if (url) {
