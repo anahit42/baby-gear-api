@@ -36,7 +36,7 @@
   },
   "scripts": {
     "fixpack": "fixpack",
-    "lint": "node ./node_modules/eslint/bin/eslint.js ./src",
+    "lint": "node ./node_modules/eslint/bin/eslint.js ./src fix",
     "precommit": "node ./node_modules/eslint/bin/eslint.js ./src",
     "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
