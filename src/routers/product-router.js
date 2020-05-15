@@ -21,4 +21,8 @@ router.post('/', validateCreateProduct, createProduct);
 router.patch('/:productId', validateUpdateProduct, updateProduct);
 router.post('/:productId/images', validateProductId, uploadImage.array('productImage', 12), uploadImages);
 
+const { deleteProduct } = require('../controllers/product-controller');
+
+router.delete('/:productId', deleteProduct);
+
 module.exports = router;

@@ -4,21 +4,11 @@ const Promise = require('bluebird');
 
 const { ProductModel } = require('../models');
 const { NotFoundError, ForbiddenError } = require('../errors');
+const { removeObjectUndefinedValue, formatUpdateSubDocument } = require('../utils');
+
 const S3Lib = require('../libs/s3-lib');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
-
-function withoutUndefinedValue(object) {
-  Object.keys(object).forEach((key) => !object[key] && delete object[key]);
-  return object;
-}
-
-function updatedSubDocument(propertyValue = {}, propertyKey) {
-  return Object.keys(propertyValue).reduce((updatedObject, key) => {
-    updatedObject[`${propertyKey}.${key}`] = propertyValue[key];
-    return updatedObject;
-  }, {});
-}
 
 async function createProduct(req, res, next) {
   try {
@@ -34,8 +24,8 @@ async function createProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories,
-    } = req.body;
+      category,
+      } = req.body;
     const userId = req.userData._id;
     const product = await ProductModel.create({
       name,
@@ -49,10 +39,10 @@ async function createProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories,
+      category,
       userId,
     });
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }
@@ -69,7 +59,7 @@ async function getProduct(req, res, next) {
     }
 
     return res.status(200).json({
-      result: product,
+      data: product,
     });
   } catch (error) {
     return next(error);
@@ -85,7 +75,7 @@ async function getProducts(req, res, next) {
     ]);
 
     return res.status(200).json({
-      results: products,
+      data: products,
       total,
     });
   } catch (error) {
@@ -134,16 +124,16 @@ async function updateProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories,
-    } = req.body;
+      category,
+      } = req.body;
 
     const updatedFields = {
-      name,
-      description,
-      price,
-      $set: {
-        ...updatedSubDocument(properties, 'properties'),
-        ...updatedSubDocument(customProperties, 'customProperties'),
+        name,
+        description,
+        price,
+        $set: {
+          ...formatUpdateSubDocument(properties, 'properties'),
+        ...formatUpdateSubDocument(customProperties, 'customProperties'),
       },
       condition,
       status,
@@ -151,9 +141,9 @@ async function updateProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      $addToSet: { subCategories: [...subCategories] },
-    };
-    const update = withoutUndefinedValue(updatedFields);
+      category,
+      };
+    const update = removeObjectUndefinedValue(updatedFields);
 
     const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });
 
@@ -161,7 +151,7 @@ async function updateProduct(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }
@@ -221,6 +211,32 @@ async function uploadImages(req, res, next) {
   }
 }
 
+async function deleteProduct (req, res, next) {
+  const { productId } = req.params;
+  const { authorization } = req.headers;
+
+  try {
+    const decoded = await JWT.verify(authorization, jwt.secret);
+
+    //const product = await ProductModel.findOne({ _id: productId });
+    const product = await ProductModel.findOneAndUpdate({ _id: productId, userId: res.userData._id ?.toString(), { status: 'deleted' });
+
+    if (product.userId.toString() !== decoded._id.toString()) {
+      return res.status(401).json({
+        error: 'Not Authorized'
+      });
+    }
+
+    await ProductModel.deleteOne({ _id: productId });
+
+    return res.status(200).json({
+      'message':'Product removed!'
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createProduct,
   updateProduct,
@@ -228,4 +244,5 @@ module.exports = {
   getProduct,
   getUserProducts,
   uploadImages,
+  deleteProduct,
 };
