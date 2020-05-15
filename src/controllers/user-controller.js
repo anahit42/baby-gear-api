@@ -48,7 +48,7 @@ async function uploadProfilePic (req, res, next) {
     const fileType = await getFileType(file);
 
     if (!fileType.mime) {
-      next(new ValidationError('Only images allowed'));
+      return next(new ValidationError('Only images allowed'));
     }
 
     const data = await s3Lib.uploadFileToS3({
@@ -77,7 +77,7 @@ async function uploadProfilePic (req, res, next) {
         });
     }
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
