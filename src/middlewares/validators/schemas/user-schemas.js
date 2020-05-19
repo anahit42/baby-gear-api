@@ -25,8 +25,14 @@ const loginUserSchema = Joi.object({
   })
 });
 
+const userIdSchema = Joi.object({
+  params: Joi.object({
+    userId: Joi.string().hex().length(24),
+  })
+});
 
 module.exports = {
   registerUserSchema,
+  userIdSchema,
   loginUserSchema
 };
