@@ -2,6 +2,44 @@ const { ProductModel } = require('../models');
 const ValidationError = require('../errors/validation-error');
 const { NotFoundError } = require('../errors');
 
+async function createProduct (req, res, next) {
+  try {
+    const {
+      name,
+      description,
+      price,
+      properties,
+      customProperties,
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      subCategories
+    } = req.body;
+    const userId = req.userData._id;
+    const product = await ProductModel.create({
+      name,
+      description,
+      price,
+      properties,
+      customProperties,
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      subCategories,
+      userId
+    });
+    return res.status(200).json({ result: product });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function getProduct (req, res, next) {
   const { productId } = req.params;
 
@@ -40,5 +78,6 @@ async function getProducts (req,res,next) {
 
 module.exports = {
   getProducts,
-  getProduct
+  getProduct,
+  createProduct
 };
