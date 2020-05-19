@@ -22,7 +22,7 @@ async function createUserToken(userInfo) {
 }
 
 async function checkLoginToken(res, userId, authorization) {
-  const decoded = await JWT.verify(authorization, jwt.secret);
+  const decoded = await JWT.verify(authorization, jwtSecret);
 
   if (userId !== decoded._id.toString()) {
     sendErrorResponse(res, HttpStatus.UNAUTHORIZED, HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED));
