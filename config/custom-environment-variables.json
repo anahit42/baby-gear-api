@@ -1,5 +1,10 @@
 {
   "jwt": {
     "secret": "JWT_SECRET"
+  },
+  "aws": {
+    "accessKey": "AWS_ACCESS_ID",
+    "secretKey": "AWS_SECRET_KEY",
+    "bucketName": "BUCKET_NAME"
   }
 }
