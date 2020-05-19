@@ -2,9 +2,9 @@ const config = require('config');
 const JWT = require('jsonwebtoken');
 const jwtSecret = config.get('jwt.secret');
 const jwtOptions = config.get('jwt.options');
-const sendErrorResponse = require('../utils');
 const HttpStatus = require('http-status-codes');
 const ForbiddenError = require('../errors/forbidden-error');
+const UnAuthorizedError = require('../errors/unauthorized-error');
 const adminToken = config.get('admin.token');
 
 
@@ -25,7 +25,7 @@ async function checkLoginToken(res, userId, authorization) {
   const decoded = await JWT.verify(authorization, jwtSecret);
 
   if (userId !== decoded._id.toString()) {
-    sendErrorResponse(res, HttpStatus.UNAUTHORIZED, HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED));
+    throw new UnAuthorizedError(HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED));
   }
 }
 

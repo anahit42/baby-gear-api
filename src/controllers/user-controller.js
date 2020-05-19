@@ -29,9 +29,8 @@ async function getUser (req, res, next) {
 
 async function getUsers(req, res, next) {
   try {
-    const { userId } = req.params;
     const { authorization } = req.headers;
-    const { limit, page } = req.params;
+    const { userId, limit, page } = req.params;
 
     TokenLib.checkLoginToken(res, userId, authorization);
 
