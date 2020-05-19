@@ -1,8 +1,15 @@
 const Joi = require('@hapi/joi');
-const { string, number, array, date } = Joi.types();
 const config = require('config');
 const status = config.get('validation.product.status');
 const condition = config.get('validation.product.condition');
+
+const { string, number, array, date } = Joi.types();
+
+const productIdSchemas = Joi.object({
+  params: Joi.object({
+    productId: Joi.string().hex().length(24).required()
+  })
+});
 
 const productsCreateSchema = Joi.object({
   body: Joi.object({
@@ -54,7 +61,7 @@ const productsUpdateSchema = Joi.object({
 });
 
 module.exports = {
+  productIdSchemas,
   productsCreateSchema,
   productsUpdateSchema
 };
-

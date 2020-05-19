@@ -55,7 +55,7 @@ function validateProductId(req, res, next) {
 }
 
 module.exports = {
+  validateProductId,
   validateCreateProduct,
   validateUpdateProduct,
-  validateProductId,
 };
