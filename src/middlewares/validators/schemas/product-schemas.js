@@ -53,7 +53,6 @@ const productsUpdateSchema = Joi.object({
   })
 });
 
-
 module.exports = {
   productsCreateSchema,
   productsUpdateSchema

@@ -1,25 +1,39 @@
+const config = require('config');
+
 const ValidationError = require('../../errors/validation-error');
+const { OrderSchemas } = require('./schemas');
 
-function validatePaging (req, res, next){
-  const { limit, skip } = req.query;
+const validationOptions = config.get('validation.options');
 
-  const convertedLimit = limit * 1;
-  const convertedSkip = skip * 1;
+function validateGetOrder (req, res, next) {
+  const { error } = OrderSchemas.orderGetSingle.validate(req, validationOptions);
 
-  if(typeof convertedLimit != 'number' || (isNaN(convertedLimit) && limit !== undefined))
-    return next(new ValidationError('Invalid paramenetrs'));
-  else
-    req.query.limit = !limit ? limit : convertedLimit;
-    
-    
-  if(typeof convertedSkip != 'number' || (isNaN(convertedSkip) && skip !== undefined))
-    return next(new ValidationError('Invalid paramenetrs'));
-  else
-    req.query.skip = !skip ? skip : convertedSkip;
+  if (error) {
+    const details = error.details.reduce((acc, detail) => {
+      return `${acc} ${detail.message}`;
+    }, '');
+
+    return next(new ValidationError(details));
+  }
+
+  return next();
+}
+
+function validateListOrders (req, res, next){
+  const { error } = OrderSchemas.orderList.validate(req, validationOptions);
+
+  if (error) {
+    const details = error.details.reduce((acc, detail) => {
+      return `${acc} ${detail.message}`;
+    }, '');
+
+    return next(new ValidationError(details));
+  }
 
   return next();
 }
 
 module.exports = {
-  validatePaging
+  validateGetOrder,
+  validateListOrders
 };
