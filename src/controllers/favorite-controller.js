@@ -4,14 +4,11 @@ async function getFavorites(req, res, next){
   const { limit, skip } = req.query;
   const userId = req.userData._id;
 
-  try{
-    const favorites = await FavoritesModel.findOne({
-      userId
-    }).limit(limit).skip(skip) || [];
+  try {
+    const favorites = await FavoritesModel.find({ userId }).limit(limit).skip(skip);
 
-    return res.status(200).json({ favorites }); 
-  }
-  catch(error){
+    return res.status(200).json({ results: favorites });
+  } catch(error){
     return next(error);
   }
 }
