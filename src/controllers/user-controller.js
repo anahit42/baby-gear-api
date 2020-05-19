@@ -5,6 +5,12 @@ const jwt = config.get('jwt');
 
 const { UserModel } = require('../models');
 const CryptoLib = require('../libs/crypto-lib');
+const { ForbiddenError } = require('../errors');
+
+function removeUndefinedValues(object) {
+  Object.keys(object).forEach(key => !object[key] && delete object[key]);
+  return object;
+}
 
 async function getUser (req, res, next) {
   const { userId } = req.params;
@@ -35,28 +41,29 @@ async function getUser (req, res, next) {
 async function updateUser(req, res, next) {
 
   const { userId } = req.params;
-  const { authorization } = req.headers;
   const { firstName, lastName, email, password } = req.body;
 
   try {
 
-    const updateFields = {
-      ...firstName && {firstName: firstName},
-      ...lastName && {lastName: lastName},
-      ...email && {email: email}
+    const allFields = {
+      firstName, lastName, email, password
     };
+
+    const updateFields = removeUndefinedValues(allFields);
 
     if (password) {
       const passwordHash = await CryptoLib.hashPassword(password);
       updateFields.password = passwordHash;
     }
 
-    const decoded = await JWT.verify(authorization, jwt.secret);
-
-    if (userId !== decoded._id.toString()) {
-      return res.status(401).json({
-        error: 'Not Authorized'
-      });
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('Not Authorized!');
+    }
+    if(email) {
+      const existUser = await UserModel.findOne({ email });
+      if (existUser) {
+        throw new ForbiddenError('Not Authorized!');
+      }
     }
 
     await UserModel.updateOne({_id: userId}, updateFields);
