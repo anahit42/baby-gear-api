@@ -31,8 +31,21 @@ const userIdSchema = Joi.object({
   })
 });
 
+const updateUserSchema = Joi.object({
+  body: Joi.object({
+    firstName: Joi.string().trim().max(100),
+    lastName: Joi.string().trim().max(100),
+    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{5,30}$')),
+    email: Joi.string().trim().email()
+  }),
+  params: Joi.object({
+    userId: Joi.string().hex().length(24).required()
+  })
+});
+
 module.exports = {
   registerUserSchema,
+  updateUserSchema,
   userIdSchema,
   loginUserSchema
 };

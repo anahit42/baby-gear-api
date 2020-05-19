@@ -35,8 +35,20 @@ function validateUserId (req, res, next) {
   return next();
 }
 
+function validateUpdateUser (req, res, next) {
+
+  const { error } = UserSchemas.updateUserSchema.validate(req, validationOptions);
+
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
+
+  return next();
+}
+
 module.exports = {
   validateRegisterUser,
+  validateUpdateUser,
   validateUserId,
   validateLoginUser
 };

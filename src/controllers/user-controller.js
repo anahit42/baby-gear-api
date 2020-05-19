@@ -2,15 +2,20 @@ const JWT = require('jsonwebtoken');
 const config = require('config');
 const FileType = require('file-type');
 
-
 const { UserModel } = require('../models');
+const { ValidationError, ConflictError, ForbiddenError } = require('../errors');
+const CryptoLib = require('../libs/crypto-lib');
 const s3Lib = require('../libs/s3-lib');
-const { ValidationError, ForbiddenError } = require('../errors');
 
 const jwt = config.get('jwt');
 const aws = config.get('aws');
 
 const getFileType = async (file) => FileType.fromBuffer(file.buffer);
+
+function removeUndefinedValues(object) {
+  Object.keys(object).forEach(key => !object[key] && delete object[key]);
+  return object;
+}
 
 async function getUser (req, res, next) {
   const { userId } = req.params;
@@ -110,8 +115,44 @@ async function uploadProfilePic (req, res, next) {
   }
 }
 
+async function updateUser(req, res, next) {
+  const { userId } = req.params;
+  const { firstName, lastName, email, password } = req.body;
+
+  try {
+    const updateFields = removeUndefinedValues({
+      firstName, lastName, email, password
+    });
+
+    if (password) {
+      updateFields.password = await CryptoLib.hashPassword(password);
+    }
+
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('Not Authorized!');
+    }
+
+    if(email) {
+      const existUser = await UserModel.exists({ email });
+
+      if (existUser) {
+        throw new ConflictError('Not Authorized!');
+      }
+    }
+
+    await UserModel.updateOne({ _id: userId }, updateFields);
+
+    return res.status(200).json({
+      results: 'User Updated!'
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getUser,
+  updateUser,
   getUsers,
   uploadProfilePic,
 };
