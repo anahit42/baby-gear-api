@@ -4,7 +4,7 @@ class ForbiddenError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: 403
+      status: 403,
     });
   }
 }
