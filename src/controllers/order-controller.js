@@ -1,17 +1,21 @@
-/* eslint-disable no-unused-vars */
 const { OrderModel } = require('../models');
+const NotfoundError = require('../errors/not-found-error');
 
-async function getOrder(req, res, next){
+async function getOrder(req, res, next)
+{
   const { orderId } = req.params;
-  try{
-    return res.status(200).json({
-      orders: await OrderModel.findOne({
-        _id: orderId
-      })
-    }); 
+  try {
+    const order = await OrderModel.findOne({
+      _id: orderId
+    });
+
+    if (!order)
+      return next(new NotfoundError('Item not found'));
+
+    return res.status(200).json(order);
   }
-  catch(error){
-    next(error);
+  catch (error) {
+    return next(error);
   }
 }
 
