@@ -1,24 +1,36 @@
 const { OrderModel } = require('../models');
 const NotfoundError = require('../errors/not-found-error');
 
-async function getOrder(req, res, next)
-{
-  const { orderId } = req.params;
+async function getOrder(req, res, next) {
+  const {orderId} = req.params;
+
   try {
-    const order = await OrderModel.findOne({
-      _id: orderId
-    });
+    const order = await OrderModel.findOne({ _id: orderId });
 
-    if (!order)
-      return next(new NotfoundError('Item not found'));
+    if (!order) {
+      throw new NotfoundError('Item not found');
+    }
 
-    return res.status(200).json(order);
+    return res.status(200).json({ result: order });
+  } catch (error) {
+    return next(error);
   }
-  catch (error) {
+}
+
+async function getOrders(req, res, next){
+  const { limit, skip } = req.query;
+  const userId = req.userData._id;
+
+  try {
+    const orders = await OrderModel.find({ ownerId: userId }).limit(limit).skip(skip);
+
+    return res.status(200).json({ results: orders });
+  } catch(error){
     return next(error);
   }
 }
 
 module.exports = {
-  getOrder
+  getOrder,
+  getOrders
 };
