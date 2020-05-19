@@ -2,14 +2,15 @@ const JWT = require('jsonwebtoken');
 const config = require('config');
 const FileType = require('file-type');
 
+
+const { UserModel } = require('../models');
+const s3Lib = require('../libs/s3-lib');
+const { ValidationError, ForbiddenError } = require('../errors');
+
 const jwt = config.get('jwt');
 const aws = config.get('aws');
 
-const { UserModel } = require('../models');
-
-const s3Lib = require('../libs/s3-lib');
-
-const { ValidationError, ForbiddenError } = require('../errors');
+const getFileType = async (file) => FileType.fromBuffer(file.buffer);
 
 async function getUser (req, res, next) {
   const { userId } = req.params;
@@ -18,14 +19,17 @@ async function getUser (req, res, next) {
   try {
     const decoded = await JWT.verify(authorization, jwt.secret);
 
-    if (userId !== decoded.id.toString()) {
+    if (userId !== decoded._id.toString()) {
       return res.status(401).json({
         error: 'Not Authorized'
       });
     }
 
     const user = await UserModel.findOne({ _id: userId }).select({
-      password: 0
+      password: 0,
+      email: 0,
+      mobilePhone: 0,
+      address: 0
     });
 
     return res.status(200).json({
@@ -34,10 +38,30 @@ async function getUser (req, res, next) {
   } catch (error) {
     return next(error);
   }
-
 }
 
-const getFileType = async (file) => FileType.fromBuffer(file.buffer);
+async function getUsers(req, res, next) {
+  const { limit, skip } = req.query;
+
+  try {
+    const [ users, total ] = await Promise.all([
+      UserModel.find({}).select({
+        password: 0,
+        email: 0,
+        mobilePhone: 0,
+        address: 0
+      }).limit(limit).skip(skip),
+      UserModel.countDocuments({})
+    ]);
+
+    return res.status(200).json({
+      results: users,
+      total
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 async function uploadProfilePic (req, res, next) {
   try {
@@ -88,5 +112,6 @@ async function uploadProfilePic (req, res, next) {
 
 module.exports = {
   getUser,
+  getUsers,
   uploadProfilePic,
 };
