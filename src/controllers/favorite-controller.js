@@ -4,42 +4,42 @@ const NotfoundError = require('../errors/not-found-error');
 async function deleteFavorite(req, res, next){
   const { productId }  = req.params;
   const userId = res.userData._id;
+
   try {
 
-    const product = await FavoritesModel.findOne({
-      userId
-    }, (err, doc)=>{
-      if(err)
-        return next(err);
-
-      let found = false;
-      for(let i in doc.products){
-        let id = doc.products[i]; 
-        if(id == productId){
-          found = true;
-          doc.products.splice(i, 1);
-          break;
-        }
+    const favoriteData = await FavoritesModel.findOneAndUpdate({ userId, products: productId },  {
+      $pull: {
+        products: productId
       }
+    }, { new: true });
 
-      if(!found)
-        return next(new NotfoundError('Item not found'));
-        
-      doc.save();
-    });
-      
-    if(!product)
-      return next(new NotfoundError('Item not found'));
-        
-    return res.status(200).json(product);
+    if(!favoriteData) {
+      throw new NotfoundError('Item not found');
+    }
 
-  }
-  catch (error) {
+    return res.status(200).json({ results: favoriteData });
+  } catch (error) {
     return next(error);
   }
 
 }
 
+async function getFavorites(req, res, next){
+  const { limit, skip } = req.query;
+  const userId = req.userData._id;
+
+  try {
+    const favorites = await FavoritesModel.findOne({ userId })
+      .limit(limit)
+      .skip(skip);
+
+    return res.status(200).json({ results: favorites });
+  } catch(error){
+    return next(error);
+  }
+}
+
 module.exports = {
+  getFavorites,
   deleteFavorite
 };
