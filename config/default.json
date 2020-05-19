@@ -21,6 +21,10 @@
       "abortEarly": true,
       "allowUnknown": true,
       "convert": false
+    },
+    "product":{
+      "status":["active", "deleted", "not-available"],
+      "condition":["new", "very good","good", "acceptable"]
     }
   },
   "image": {

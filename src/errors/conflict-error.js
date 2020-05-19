@@ -1,12 +1,12 @@
 const CustomError = require('./custom-error');
 
-class ForbiddenError extends CustomError {
+class ConflictError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: 403,
+      status: 409
     });
   }
 }
 
-module.exports = ForbiddenError;
+module.exports = ConflictError;
