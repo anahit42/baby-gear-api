@@ -7,7 +7,7 @@ async function getOrders(req, res, next){
   try{
     const orders = await OrderModel.findOne({
       ownerId: userId
-    }).limit(limit).skip(skip);
+    }).limit(limit).skip(skip) || [];
 
     return res.status(200).json({ orders }); 
   }
