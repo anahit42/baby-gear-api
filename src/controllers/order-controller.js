@@ -1,15 +1,18 @@
-/* eslint-disable no-unused-vars */
 const { OrderModel } = require('../models');
 
 async function getOrders(req, res, next){
-  const { limit, offset } = req.query;
+  const { limit, skip } = req.query;
+  const userId = req.userData._id;
+
   try{
-    return res.status(200).json({
-      orders: await OrderModel.find().limit(limit * 1).skip(offset * 1).exec()
-    }); 
+    const orders = await OrderModel.findOne({
+      ownerId: userId
+    }).limit(limit).skip(skip);
+
+    return res.status(200).json({ orders }); 
   }
   catch(error){
-    next(error);
+    return next(error);
   }
 }
 
