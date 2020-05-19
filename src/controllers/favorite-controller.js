@@ -1,14 +1,18 @@
-// eslint-disable-next-line no-unused-vars
 const { FavoritesModel } = require('../models');
+
 async function getFavorites(req, res, next){
-  const { limit, offset } = req.params;
+  const { limit, skip } = req.query;
+  const userId = req.userData._id;
+
   try{
-    return res.status(200).json({
-      orders: await FavoritesModel.find().limit(limit).skip(offset).exec()
-    }); 
+    const favorites = await FavoritesModel.findOne({
+      userId
+    }).limit(limit).skip(skip) || [];
+
+    return res.status(200).json({ favorites }); 
   }
   catch(error){
-    next(error);
+    return next(error);
   }
 }
 
