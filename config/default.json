@@ -22,5 +22,8 @@
       "allowUnknown": true,
       "convert": false
     }
+  },
+  "image": {
+    "validMimes": [ "image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp" ]
   }
 }

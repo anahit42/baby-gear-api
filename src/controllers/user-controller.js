@@ -9,7 +9,7 @@ const { UserModel } = require('../models');
 
 const s3Lib = require('../libs/s3-lib');
 
-const ValidationError = require('../errors/validation-error');
+const { ValidationError, ForbiddenError } = require('../errors');
 
 async function getUser (req, res, next) {
   const { userId } = req.params;
@@ -43,7 +43,14 @@ async function uploadProfilePic (req, res, next) {
   try {
     const { file } = req;
     const { userId } = req.params;
+    const { authorization } = req.headers;
     const { bucketName, accessKey, secretKey } = aws;
+
+    const decoded = await JWT.verify(authorization, jwt.secret);
+
+    if (userId !== decoded._id.toString()) {
+      return next(new ForbiddenError('Access to the requested resource is forbidden.'));
+    }
 
     const fileType = await getFileType(file);
 
@@ -57,10 +64,10 @@ async function uploadProfilePic (req, res, next) {
       secret: secretKey,
       fileBuffer: file.buffer,
       fileMimeType: fileType.mime,
-      distFilePath: file.originalname,
+      distFilePath: `${userId}/${file.originalname}`,
     });
 
-    const url = await s3Lib.getSignedUrl({
+    const url = s3Lib.getSignedUrl({
       bucket: bucketName,
       key: accessKey,
       secret: secretKey,
@@ -68,14 +75,12 @@ async function uploadProfilePic (req, res, next) {
       mimeType: fileType.mime,
     });
 
-    if (url) {
-      await UserModel.findByIdAndUpdate(userId, { image: url })
-        .then(() => {
-          return res.status(200).json({
-            image: url,
-          });
-        });
-    }
+    await UserModel.findByIdAndUpdate(userId, { image: url });
+
+    return res.status(200).json({
+      image: data.Key || data.key,
+    });
+
   } catch (error) {
     return next(error);
   }
