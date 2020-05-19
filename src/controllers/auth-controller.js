@@ -1,7 +1,6 @@
 const HttpStatus = require('http-status-codes');
 const NotFoundError = require('../errors/not-found-error');
 const ConflictError = require('../errors/conflict-error');
-const ForbiddenError = require('../errors/forbidden-error');
 
 const { UserModel } = require('../models');
 const CryptoLib = require('../libs/crypto-lib');
@@ -44,30 +43,32 @@ async function register (req, res, next) {
 
     const { email } = req.body;
 
-    const user = await checkIfUserExists(email);
+    const user = await UserModel.exists({ email });
+
     if (user) {
       throw new ConflictError(duplicateUserError);
     }
 
-    const { firstName,
+    const {
+      firstName,
       lastName,
-      role,
       password,
       mobilePhone,
-      address} = req.body;
+      address
+    } = req.body;
 
     const  passwordHash = await CryptoLib.hashPassword(password);
 
     await UserModel.create({
       firstName,
       lastName,
-      role,
       email,
       password: passwordHash,
       mobilePhone,
       address,
       isActive: true
     });
+
     return res.status(HttpStatus.OK).json({ email });
   } catch (error) {
     return next(error);
@@ -77,20 +78,18 @@ async function register (req, res, next) {
 async function registerAdmin(req, res, next) {
   try {
     const { email } = req.body;
-    const user = await checkIfUserExists(email);
+    const user = await UserModel.exists({ email });
+
     if (user) {
       throw new ConflictError(duplicateUserError);
     }
 
     const { adminToken } = req.headers;
 
-    if (adminToken) {
-      throw new ForbiddenError(HttpStatus.getStatusText(HttpStatus.FORBIDDEN));
-    }
+    TokenLib.checkAdminToken(adminToken);
 
-    await TokenLib.checkAdminToken(adminToken);
-
-    const { firstName,
+    const {
+      firstName,
       lastName,
       password,
       mobilePhone,
@@ -114,13 +113,6 @@ async function registerAdmin(req, res, next) {
   } catch (error) {
     return next(error);
   }
-}
-
-async function checkIfUserExists(email) {
-  const userExists = await UserModel.exists({ email });
-  console.log('userExists = ' + userExists);
-
-  return userExists;
 }
 
 module.exports = {

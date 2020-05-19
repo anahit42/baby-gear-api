@@ -7,7 +7,6 @@ const ForbiddenError = require('../errors/forbidden-error');
 const UnAuthorizedError = require('../errors/unauthorized-error');
 const adminToken = config.get('admin.token');
 
-
 async function createUserToken(userInfo) {
 
   const {
@@ -29,7 +28,7 @@ async function checkLoginToken(res, userId, authorization) {
   }
 }
 
-async function checkAdminToken(token) {
+function checkAdminToken(token) {
   if (token !== adminToken) {
     throw new ForbiddenError(HttpStatus.getStatusText(HttpStatus.FORBIDDEN));
   }
