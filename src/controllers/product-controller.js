@@ -1,5 +1,24 @@
 const { ProductModel } = require('../models');
 const ValidationError = require('../errors/validation-error');
+const { NotFoundError } = require('../errors');
+
+async function getProduct (req, res, next) {
+  const { productId } = req.params;
+
+  try {
+    const product = await ProductModel.findOne({ _id: productId });
+
+    if (!product) {
+      throw new NotFoundError('Product not found');
+    }
+
+    return res.status(200).json({
+      product
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 async function getProducts (req,res,next) {
   const { limit, skip } = req.query;
@@ -17,9 +36,9 @@ async function getProducts (req,res,next) {
   } catch (error) {
     return next(error);
   }
-
 }
 
 module.exports = {
-  getProducts
+  getProducts,
+  getProduct
 };
