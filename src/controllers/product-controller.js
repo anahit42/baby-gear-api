@@ -1,6 +1,7 @@
 const { ProductModel } = require('../models');
+const { NotFoundError } = require('../errors');
 
-const createProduct = async (req, res, next)=> {
+async function createProduct(req, res, next) {
   try {
     const {
       name,
@@ -36,49 +37,65 @@ const createProduct = async (req, res, next)=> {
   } catch (error) {
     return next(error);
   }
-};
-const updateProduct = async (req,res,next)=> {
+}
+
+function withoutUndefinedValue(object) {
+  Object.keys(object).forEach(key => !object[key] && delete object[key]);
+  return object;
+}
+function updatedSubDocument(propertyValue = {}, propertyKey) {
+  return  Object.keys(propertyValue).reduce((updatedObject,key) => {
+    updatedObject[`${propertyKey}.${key}`] = propertyValue[key];
+    return updatedObject;
+  },{});
+}
+async function updateProduct(req, res, next) {
   try {
-    const { id } = req.params;
-    const _id = { _id: id };
-    const updateFields = req.body;
+    const { productId } = req.params;
+    const userId = req.userData._id;
+    const findQuery  = { _id: productId, userId };
+    const {
+      name,
+      description,
+      price,
+      properties,
+      customProperties,
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      subCategories
+    } = req.body;
 
-    // await ProductModel.findOne( _id, async (err, product) => {
-    //   Object.keys(updateFields).map( update => {
-    //     const value = updateFields[update];
-    //     if(Array.isArray(value)){
-    //       value.map(item=>{
-    //         if( product[update].indexOf(item) === -1 ) product[update].push(item);
-    //       });
-    //     }else if( typeof value === 'object' ){
-    //       product[update] = Object.assign(product[update], value);
-    //     }else{
-    //       product[update] = value;
-    //     }
-    //   });
-    //   await product.save();
-    //   return res.status(200).json(product);
-    // });
-
-    const product = await ProductModel.findOne( _id);
-    Object.keys(updateFields).map( update => {
-      const value = updateFields[update];
-      if(Array.isArray(value)){
-        value.map(item=>{
-          if( product[update].indexOf(item) === -1 ) product[update].push(item);
-        });
-      }else if( typeof value === 'object' ){
-        product[update] = Object.assign(product[update], value);
-      }else{
-        product[update] = value;
-      }
-    });
-    await ProductModel.updateOne(_id,product);
+    const updatedFields = {
+      name,
+      description,
+      price,
+      $set : {
+        ...updatedSubDocument(properties, 'properties'),
+        ...updatedSubDocument(customProperties, 'customProperties')
+      },
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      $addToSet: { 'subCategories' : [...subCategories] }
+    };
+    const update = withoutUndefinedValue(updatedFields);
+    const product = await ProductModel.findOneAndUpdate(findQuery, update, { 'new': true});
+    if(!product){
+      return next(new NotFoundError('Product not found'));
+    }
     return res.status(200).json(product);
-  }catch (error) {
-    next(error);
+
+  } catch (error) {
+    return  next(error);
   }
-};
+}
 module.exports = {
   createProduct,
   updateProduct
