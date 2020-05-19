@@ -2,18 +2,24 @@ const config = require('config');
 
 const validationOptions = config.get('validation.options');
 
-const { ValidationError, ForbiddenError } = require('../../errors');
 const { UserSchemas } = require('./schemas');
+const { handleErrorDetails } = require('./handlers');
 
 function validateRegisterUser (req, res, next) {
   const { error } = UserSchemas.registerUserSchema.validate(req, validationOptions);
 
   if (error) {
-    const details = error.details.reduce((acc, detail) => {
-      return `${acc} ${detail.message}`;
-    }, '');
+    return handleErrorDetails(error, next);
+  }
 
-    return next(new ValidationError(details));
+  return next();
+}
+
+function validateLoginUser (req, res, next) {
+  const { error } = UserSchemas.loginUserSchema.validate(req, validationOptions);
+
+  if (error) {
+    return handleErrorDetails(error, next);
   }
 
   return next();
@@ -23,7 +29,7 @@ function validateUserId (req, res, next) {
   const { error } = UserSchemas.userIdSchema.validate(req, validationOptions);
 
   if (error) {
-    return next(new ForbiddenError('Access to the requested resource is forbidden.'));
+    return handleErrorDetails(error, next);
   }
 
   return next();
@@ -32,4 +38,5 @@ function validateUserId (req, res, next) {
 module.exports = {
   validateRegisterUser,
   validateUserId,
+  validateLoginUser
 };
