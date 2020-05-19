@@ -1,11 +1,13 @@
 {
   "jwt": {
-    "secret": "JWT_SECRET",
-    "adminCode": "JWT_ADMIN_CODE"
+    "secret": "JWT_SECRET"
   },
   "aws" : {
     "accessId": "AWS_ACCESS_ID",
     "secretKey": "AWS_SECRET_KEY",
     "bucketName": "BUCKET_NAME"
+  },
+  "admin" : {
+    "token": "ADMIN_TOKEN"
   }
 }

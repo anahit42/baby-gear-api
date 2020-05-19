@@ -4,17 +4,19 @@ const jwtSecret = config.get('jwt.secret');
 const jwtOptions = config.get('jwt.options');
 const sendErrorResponse = require('../utils');
 const HttpStatus = require('http-status-codes');
-const jwt = config.get('jwt');
+const ForbiddenError = require('../errors/forbidden-error');
+const adminToken = config.get('admin.token');
 
-async function createUserToken(userId, email, role) {
-  return JWT.sign({ _id: userId, email: email, role: role },
-    jwtSecret,
-    jwtOptions);
-}
 
-// FOR TESTING ONLY
-async function createAdminToken(adminCode) {
-  return JWT.sign({ adminCode: adminCode },
+async function createUserToken(userInfo) {
+
+  const {
+    userId,
+    email,
+    role
+  } = userInfo;
+
+  return JWT.sign({ _id: userId, email, role },
     jwtSecret,
     jwtOptions);
 }
@@ -27,17 +29,14 @@ async function checkLoginToken(res, userId, authorization) {
   }
 }
 
-async function checkAdminToken(res, authorization) {
-  const decoded = await JWT.verify(authorization, jwt.secret);
-
-  if (decoded.adminCode.toString() !== jwt.adminCode) {
-    sendErrorResponse(res, HttpStatus.FORBIDDEN, HttpStatus.getStatusText(HttpStatus.FORBIDDEN));
+async function checkAdminToken(token) {
+  if (token !== adminToken) {
+    throw new ForbiddenError(HttpStatus.getStatusText(HttpStatus.FORBIDDEN));
   }
-
 }
 
 module.exports = {
   createUserToken,
   checkLoginToken,
-  checkAdminToken,
-  createAdminToken };
+  checkAdminToken
+};

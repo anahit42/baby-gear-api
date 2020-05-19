@@ -15,7 +15,8 @@ async function getUser (req, res, next) {
     const user = await UserModel.findOne({ _id: userId }).select({
       password: 0,
       address: 0,
-      email: 0
+      email: 0,
+      mobilePhone: 0
     });
 
     return res.status(HttpStatus.OK).json({
@@ -38,7 +39,8 @@ async function getUsers(req, res, next) {
     const users = await UserModel.find().skip(limit * page).limit(limit).select({
       password: 0,
       address: 0,
-      email: 0
+      email: 0,
+      mobilePhone: 0
     });
 
     return res.status(HttpStatus.OK).json({
@@ -60,10 +62,10 @@ async function uplaodImage(req, res, next) {
   const { userId } = req.params;
   const { authorization } = req.headers;
   console.log('userId = ' + userId);
-  console.log('req.files = ' + req.files);
-  console.log('req.file = ' + req.body.files);
+  console.log('req.file = ' + req.file);
+  console.log('req.file = ' + req.files);
 
-  TokenLib.checkLoginToken(res, userId, authorization);
+  await TokenLib.checkLoginToken(res, userId, authorization);
   // const { originalname,
   //   encoding,
   //   mimetype,
@@ -72,32 +74,35 @@ async function uplaodImage(req, res, next) {
   //   filename,
   //   path,
   //     //buffer
-  //     } = req.body.file;
+  //     } = req.file;
 
   try{
-    console.log(req.body);
+    console.log(req.file);
 
-    const buffer = await fsExtra.readFile(req.body.file.destination);
+    const buffer = await fsExtra.readFile(req.file.destination);
 
-    const data = await s3Lib.uploadFileToS3({ bucket: aws.bucketName,
+    const data = await s3Lib.uploadFileToS3({
+      bucket: aws.bucketName,
       key: aws.accessId,
       secret: aws.secretKey,
       fileBuffer: buffer,
-      fileMimeType: req.body.file.mimeType,
-      destFilePath: req.body.file.destination,
+      fileMimeType: req.file.mimetype,
+      destFilePath: req.file.destination,
     });
 
-    const url = await s3Lib.getSignedUrl({bucket: aws.bucketName,
+    const url = await s3Lib.getSignedUrl({
+      bucket: aws.bucketName,
       key: aws.accessId,
       secret: aws.secretKey,
       destFileKey: data.Key || data.key,
       mimeType: req.file.mimeType,
     });
 
-    const user = await UserModel.findByIdAndUpdate({ _id: userId }, { image: url }).select({
+    const user = await UserModel.findByIdAndUpdate({ _id: userId }, { image: url.destFileKey }).select({
       password: 0,
       address: 0,
-      email: 0
+      email: 0,
+      mobilePhone: 0
     });
 
     return res.status(HttpStatus.OK).json({
