@@ -1,13 +1,13 @@
 const CustomError = require('./custom-error');
 const HttpStatus = require('http-status-codes');
 
-class ForbiddenError extends CustomError {
+class UnAuthorizedError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: HttpStatus.FORBIDDEN
+      status: HttpStatus.UNAUTHORIZED
     });
   }
 }
 
-module.exports = ForbiddenError;
+module.exports = UnAuthorizedError;

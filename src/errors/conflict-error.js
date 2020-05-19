@@ -1,10 +1,11 @@
 const CustomError = require('./custom-error');
+const HttpStatus = require('http-status-codes');
 
 class ConflictError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: 409
+      status: HttpStatus.Conflict
     });
   }
 }
