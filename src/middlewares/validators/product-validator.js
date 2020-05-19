@@ -6,8 +6,9 @@ const validationOptions = config.get('validation.options');
 const { ValidationError } = require('../../errors');
 const { ProductSchemas } = require('./schemas');
 
-const validateCreateProduct = (req, res, next) => {
+function validateCreateProduct(req, res, next)  {
   const { error } = ProductSchemas.productsCreateSchema.validate(req, validationOptions);
+
   if (error) {
     const details = error.details.reduce((acc, detail) => {
       return `${acc} ${detail.message}`;
@@ -15,8 +16,23 @@ const validateCreateProduct = (req, res, next) => {
 
     return next(new ValidationError(details));
   }
+
   return next();
-};
+}
+
+function validateUpdateProduct (req, res, next) {
+  const { error } = ProductSchemas.productsUpdateSchema.validate(req, validationOptions);
+
+  if (error) {
+    const details = error.details.reduce((acc, detail) => {
+      return `${acc} ${detail.message}`;
+    }, '');
+
+    return next(new ValidationError(details));
+  }
+
+  return next();
+}
 
 function validateProductId(req, res, next) {
   const { productId } = req.params;
@@ -39,6 +55,7 @@ function validateProductId(req, res, next) {
 }
 
 module.exports = {
+  validateCreateProduct,
+  validateUpdateProduct,
   validateProductId,
-  validateCreateProduct
 };

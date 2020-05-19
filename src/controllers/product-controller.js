@@ -1,6 +1,18 @@
 const { ProductModel } = require('../models');
-const ValidationError = require('../errors/validation-error');
 const { NotFoundError } = require('../errors');
+const ValidationError = require('../errors/validation-error');
+
+function withoutUndefinedValue(object) {
+  Object.keys(object).forEach(key => !object[key] && delete object[key]);
+  return object;
+}
+
+function updatedSubDocument(propertyValue = {}, propertyKey) {
+  return  Object.keys(propertyValue).reduce((updatedObject,key) => {
+    updatedObject[`${propertyKey}.${key}`] = propertyValue[key];
+    return updatedObject;
+  },{});
+}
 
 async function createProduct (req, res, next) {
   try {
@@ -51,7 +63,7 @@ async function getProduct (req, res, next) {
     }
 
     return res.status(200).json({
-      product
+      result: product
     });
   } catch (error) {
     return next(error);
@@ -76,8 +88,59 @@ async function getProducts (req,res,next) {
   }
 }
 
+async function updateProduct(req, res, next) {
+  try {
+    const { productId } = req.params;
+    const userId = req.userData._id;
+    const findQuery  = { _id: productId, userId };
+    const {
+      name,
+      description,
+      price,
+      properties,
+      customProperties,
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      subCategories
+    } = req.body;
+
+    const updatedFields = {
+      name,
+      description,
+      price,
+      $set : {
+        ...updatedSubDocument(properties, 'properties'),
+        ...updatedSubDocument(customProperties, 'customProperties')
+      },
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      $addToSet: { 'subCategories' : [...subCategories] }
+    };
+    const update = withoutUndefinedValue(updatedFields);
+
+    const product = await ProductModel.findOneAndUpdate(findQuery, update, { 'new': true});
+
+    if(!product){
+      throw new NotFoundError('Product not found');
+    }
+
+    return res.status(200).json({ result: product });
+  } catch (error) {
+    return  next(error);
+  }
+}
+
 module.exports = {
+  createProduct,
+  updateProduct,
   getProducts,
   getProduct,
-  createProduct
 };
