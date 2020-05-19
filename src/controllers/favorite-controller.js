@@ -5,12 +5,13 @@ async function deleteFavorite(req, res, next){
   const { productId }  = req.params;
   const userId = res.userData._id;
   try {
-    
+
     const product = await FavoritesModel.findOne({
       userId
     }, (err, doc)=>{
       if(err)
         return next(err);
+
       let found = false;
       for(let i in doc.products){
         let id = doc.products[i]; 
@@ -26,7 +27,10 @@ async function deleteFavorite(req, res, next){
         
       doc.save();
     });
-
+      
+    if(!product)
+      return next(new NotfoundError('Item not found'));
+        
     return res.status(200).json(product);
 
   }
