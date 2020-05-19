@@ -1,4 +1,28 @@
 const { FavoritesModel } = require('../models');
+const NotfoundError = require('../errors/not-found-error');
+
+async function deleteFavorite(req, res, next){
+  const { productId }  = req.params;
+  const userId = res.userData._id;
+
+  try {
+
+    const favoriteData = await FavoritesModel.findOneAndUpdate({ userId, products: productId },  {
+      $pull: {
+        products: productId
+      }
+    }, { new: true });
+
+    if(!favoriteData) {
+      throw new NotfoundError('Item not found');
+    }
+
+    return res.status(200).json({ results: favoriteData });
+  } catch (error) {
+    return next(error);
+  }
+
+}
 
 async function getFavorites(req, res, next){
   const { limit, skip } = req.query;
@@ -16,5 +40,6 @@ async function getFavorites(req, res, next){
 }
 
 module.exports = {
-  getFavorites
+  getFavorites,
+  deleteFavorite
 };

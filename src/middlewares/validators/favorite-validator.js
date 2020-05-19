@@ -1,4 +1,15 @@
+const mongoose = require('mongoose');
+
 const ValidationError = require('../../errors/validation-error');
+
+function validateProductId (req, res, next){
+  const { productId } = req.params;
+
+  if(!mongoose.Types.ObjectId.isValid(productId))
+    return next(new ValidationError('Invalid product Id'));
+
+  return next();
+}
 
 function validatePaging (req, res, next){
   const { limit, skip } = req.query;
@@ -21,5 +32,6 @@ function validatePaging (req, res, next){
 }
 
 module.exports = {
-  validatePaging
+  validatePaging,
+  validateProductId
 };
