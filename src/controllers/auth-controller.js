@@ -2,7 +2,7 @@ const HttpStatus = require('http-status-codes');
 const NotFoundError = require('../errors/not-found-error');
 const ConflictError = require('../errors/conflict-error');
 
-const { UserModel } = require('../models');
+const { UserModel, FavoritesModel, BucketModel } = require('../models');
 const CryptoLib = require('../libs/crypto-lib');
 const TokenLib = require('../libs/token-lib');
 const AdminRole = require('../constants').Admin;
@@ -59,15 +59,19 @@ async function register (req, res, next) {
 
     const  passwordHash = await CryptoLib.hashPassword(password);
 
-    await UserModel.create({
-      firstName,
-      lastName,
-      email,
-      password: passwordHash,
-      mobilePhone,
-      address,
-      isActive: true
-    });
+    await Promise.all([
+      UserModel.create({
+        firstName,
+        lastName,
+        email,
+        password: passwordHash,
+        mobilePhone,
+        address,
+        isActive: true
+      }),
+      FavoritesModel.create({}),
+      BucketModel.create({})
+    ]);
 
     return res.status(HttpStatus.OK).json({ email });
   } catch (error) {
