@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
-
+const config = require('config');
 const ValidationError = require('../../errors/validation-error');
-
+const { handleErrorDetails } = require('./handlers');
+const { FavoriteSchemas } = require('./schemas');
+const validationOptions = config.get('validation.options');
 function validateProductId (req, res, next){
   const { productId } = req.params;
 
@@ -31,7 +33,16 @@ function validatePaging (req, res, next){
   return next();
 }
 
+function validateAddFavoriteProduct(req, res, next)  {
+  const { error } = FavoriteSchemas.addFavoriteProductSchemas.validate(req, validationOptions);
+
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
+  return next();
+}
 module.exports = {
   validatePaging,
-  validateProductId
+  validateProductId,
+  validateAddFavoriteProduct
 };
