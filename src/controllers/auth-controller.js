@@ -26,7 +26,7 @@ async function login (req, res, next) {
       throw new NotFoundError(userNotFoundError);
     }
 
-    const token = await TokenLib.createUserToken({ _id: user._id, email, role: user.role });
+    const token = await TokenLib.createUserToken({ userId: user._id, email, role: user.role });
 
     return res.status(HttpStatus.OK).json({
       _id: user._id,
