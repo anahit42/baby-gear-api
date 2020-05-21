@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const UserRole = require('../../constants');
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
@@ -7,8 +7,8 @@ const UserSchema = new Schema({
   lastName: String,
   role: {
     type: String,
-    enum: ['admin', 'user'],
-    default: 'user'
+    enum: [UserRole.Admin, UserRole.User],
+    default: UserRole.User
   },
   email: {
     type: String,
@@ -24,7 +24,8 @@ const UserSchema = new Schema({
     street: String,
     country: String,
     city: String
-  }
+  },
+  isActive: Boolean
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = UserSchema;
