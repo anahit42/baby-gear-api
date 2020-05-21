@@ -3,7 +3,7 @@ const FileType = require('file-type');
 const Promise = require('bluebird');
 
 const { ProductModel } = require('../models');
-const { NotFoundError, ValidationError } = require('../errors');
+const { NotFoundError, ValidationError, ForbiddenError } = require('../errors');
 const S3Lib = require('../libs/s3-lib');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
@@ -88,6 +88,26 @@ async function getProducts (req,res,next) {
 
     return res.status(200).json({
       results
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getUserProducts(req, res, next) {
+  const { userId } = req.params;
+  const { _id } = req.userData;
+  const { skip, limit } = req.query;
+
+  try {
+    if (userId !== _id.toString()) {
+      throw new ForbiddenError('You\'re not allowed to view this resource');
+    }
+
+    const products = await ProductModel.find({ userId }).limit(limit).skip(skip);
+
+    return res.status(200).json({
+      products
     });
   } catch (error) {
     return next(error);
@@ -203,5 +223,6 @@ module.exports = {
   updateProduct,
   getProducts,
   getProduct,
+  getUserProducts,
   uploadImages,
 };
