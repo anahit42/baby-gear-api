@@ -103,10 +103,14 @@ async function getUserProducts(req, res, next) {
       throw new ForbiddenError('You\'re not allowed to view this resource');
     }
 
-    const products = await ProductModel.find({ userId }).limit(limit).skip(skip);
+    const [products, total] = await Promise.all([
+      ProductModel.find({ userId }).limit(limit).skip(skip),
+      ProductModel.countDocuments(),
+    ]);
 
     return res.status(200).json({
-      products,
+      data: products,
+      total,
     });
   } catch (error) {
     return next(error);
