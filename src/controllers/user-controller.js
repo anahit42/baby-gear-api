@@ -49,24 +49,25 @@ async function getUsers(req, res, next) {
 
   try {
 
-    if (req.userData.role === 'admin') {
-      const [users, total] = await Promise.all([
-        UserModel.find({}).select({
-          password: 0,
-          email: 0,
-          mobilePhone: 0,
-          address: 0
-        }).limit(limit).skip(skip),
-        UserModel.countDocuments({})
-      ]);
-
-      return res.status(200).json({
-        results: users,
-        total
-      });
+    if (req.userData.role !== 'admin') {
+      return next(new ForbiddenError('Access to the requested resource is forbidden.'));
     }
 
-    return next(new ForbiddenError('Access to the requested resource is forbidden.'));
+    const [users, total] = await Promise.all([
+      UserModel.find({}).select({
+        password: 0,
+        email: 0,
+        mobilePhone: 0,
+        address: 0
+      }).limit(limit).skip(skip),
+      UserModel.countDocuments({})
+    ]);
+
+    return res.status(200).json({
+      results: users,
+      total
+    });
+
   } catch (error) {
     return next(error);
   }
