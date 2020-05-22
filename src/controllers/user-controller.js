@@ -70,8 +70,8 @@ async function uploadProfilePic(req, res, next) {
     const { file } = req;
     const { userId } = req.params;
 
-    if (userId !== req.userData._id.toString()) {
-      return next(new ForbiddenError('Access to the requested resource is forbidden.'));
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('Access to the requested resource is forbidden.');
     }
 
     const fileType = await getFileType(file);
