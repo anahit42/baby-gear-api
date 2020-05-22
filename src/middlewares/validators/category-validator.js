@@ -1,9 +1,9 @@
 const config = require('config');
 
-const validationOptions = config.get('validation.options');
-
 const { CategorySchemas } = require('./schemas');
 const { handleErrorDetails } = require('./handlers');
+
+const validationOptions = config.get('validation.options');
 
 function validateCreateCategory(req, res, next) {
   const { error } = CategorySchemas.createCategorySchema.validate(req, validationOptions);

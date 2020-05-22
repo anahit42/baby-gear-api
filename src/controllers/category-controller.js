@@ -1,7 +1,6 @@
 const HttpStatus = require('http-status-codes');
 const { CategoryModel } = require('../models');
-const ConflictError = require('../errors/conflict-error');
-const NotFoundError = require('../errors/not-found-error');
+const { ConflictError, NotFoundError } = require('../errors');
 
 function getSlug(name) {
   return name.replace(/\s+/g, '-').toLowerCase();

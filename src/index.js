@@ -32,9 +32,6 @@ app.use('/auth', authRouter);
 app.use('/categories', categoryRouter);
 app.use('/products', productRouter);
 
-
-app.use('/categories', categoryRouter);
-
 app.use(AuthMiddleware.authorize);
 app.use('/favorites', favoriteRouter);
 app.use('/orders', orderRouter);
