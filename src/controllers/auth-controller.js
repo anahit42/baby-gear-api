@@ -58,19 +58,23 @@ async function register (req, res, next) {
     } = req.body;
 
     const  passwordHash = await CryptoLib.hashPassword(password);
+    const createdUser = await UserModel.create({
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+      mobilePhone,
+      address,
+      isActive: true
+    });
 
     await Promise.all([
-      UserModel.create({
-        firstName,
-        lastName,
-        email,
-        password: passwordHash,
-        mobilePhone,
-        address,
-        isActive: true
+      FavoritesModel.create({
+        userId:createdUser._id
       }),
-      FavoritesModel.create({}),
-      BucketModel.create({})
+      BucketModel.create({
+        userId:createdUser._id
+      })
     ]);
 
     return res.status(HttpStatus.OK).json({ email });

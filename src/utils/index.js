@@ -1,2 +1,2 @@
-module.exports.RemoveObjectUndefinedValue = require('./removeObjectUndefinedValue');
-module.exports.FormatUpdateSubDocument = require('./formatUpdateSubDocument');
+module.exports.removeObjectUndefinedValue = require('./removeObjectUndefinedValue');
+module.exports.formatUpdateSubDocument = require('./formatUpdateSubDocument');
