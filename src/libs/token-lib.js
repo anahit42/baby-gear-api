@@ -10,12 +10,12 @@ const adminToken = config.get('admin.token');
 async function createUserToken(userInfo) {
 
   const {
-    userId,
+    _id,
     email,
     role
   } = userInfo;
 
-  return JWT.sign({ _id: userId, email, role },
+  return JWT.sign({ _id, email, role },
     jwtSecret,
     jwtOptions);
 }

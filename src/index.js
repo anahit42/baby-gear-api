@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 
 app.use('/auth', authRouter);
 
-app.use(AuthMiddleware.authorize);
+//app.use(AuthMiddleware.authorize);
 
 app.use('/categories', categoryRouter);
 app.use('/favorites', favoriteRouter);
@@ -41,9 +41,14 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
 
   if (error.customError) {
-    return res.status(error.status).json({
+    let status;
+    if (error.status >= 100 && error.status < 600)
+      status = error.status;
+    else
+      status = 500;
+    return res.status(status).json({
       success: false,
-      status: error.status,
+      status: status,
       message: error.message
     });
   }

@@ -5,7 +5,7 @@ class ConflictError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: HttpStatus.Conflict
+      status: HttpStatus.CONFLICT
     });
   }
 }
