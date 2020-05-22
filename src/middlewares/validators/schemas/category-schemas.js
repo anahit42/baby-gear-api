@@ -7,6 +7,18 @@ const categoryListing = Joi.object({
   }),
 });
 
+const categoryCreate = Joi.object({
+  body: Joi.object({
+    name: Joi.string().max(500).required(),
+    description: Joi.string().max(500).required(),
+    subCategories: Joi.array().items(Joi.object({
+      name: Joi.string().max(500).required(),
+      description: Joi.string().max(500).required(),
+    })),
+  }),
+});
+
 module.exports = {
   categoryListing,
+  categoryCreate,
 };

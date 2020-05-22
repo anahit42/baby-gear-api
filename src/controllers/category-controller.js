@@ -18,6 +18,19 @@ async function getCategories(req, res, next) {
   }
 }
 
+async function createCategory(req, res, next) {
+  try {
+    const { name, description, subCategories } = req.body;
+
+    const category = await CategoryModel.create({ name, description, subCategories });
+
+    return res.status(200).json({ data: category });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getCategories,
+  createCategory,
 };

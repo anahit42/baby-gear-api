@@ -15,6 +15,17 @@ function validateGetCategories(req, res, next) {
   return next();
 }
 
+function validateCreateCategory(req, res, next) {
+  const { error } = CategorySchemas.categoryCreate.validate(req, validationOptions);
+
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
+
+  return next();
+}
+
 module.exports = {
   validateGetCategories,
+  validateCreateCategory,
 };
