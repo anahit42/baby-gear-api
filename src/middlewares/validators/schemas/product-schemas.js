@@ -1,5 +1,6 @@
 const Joi = require('@hapi/joi');
 const config = require('config');
+
 const status = config.get('validation.product.status');
 const condition = config.get('validation.product.condition');
 
@@ -7,8 +8,8 @@ const { string, number, array, date } = Joi.types();
 
 const productIdSchemas = Joi.object({
   params: Joi.object({
-    productId: Joi.string().hex().length(24).required()
-  })
+    productId: Joi.string().hex().length(24).required(),
+  }),
 });
 
 const productsCreateSchema = Joi.object({
@@ -30,8 +31,8 @@ const productsCreateSchema = Joi.object({
     brand: string.trim().max(100),
     country: string.trim().max(100),
     issueDate: date.greater('1-1-1974').prefs({ convert: true }),
-    subCategories: array.items(string.hex().length(24)).required()
-  })
+    subCategories: array.items(string.hex().length(24)).required(),
+  }),
 });
 
 const productsUpdateSchema = Joi.object({
@@ -53,15 +54,15 @@ const productsUpdateSchema = Joi.object({
     brand: string.trim().max(100),
     country: string.trim().max(100),
     issueDate: date.greater('1-1-1974').prefs({ convert: true }),
-    subCategories: array.items(string.hex().length(24))
+    subCategories: array.items(string.hex().length(24)),
   }),
   params: Joi.object({
-    productId: string.hex().length(24).required()
-  })
+    productId: string.hex().length(24).required(),
+  }),
 });
 
 module.exports = {
   productIdSchemas,
   productsCreateSchema,
-  productsUpdateSchema
+  productsUpdateSchema,
 };

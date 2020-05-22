@@ -13,14 +13,14 @@
   },
   "jwt": {
     "options": {
-      "expiresIn": 300
+      "expiresIn": 365000
     }
   },
   "validation": {
     "options": {
       "abortEarly": true,
       "allowUnknown": true,
-      "convert": false
+      "convert": true
     },
     "product":{
       "status":["active", "deleted", "not-available"],

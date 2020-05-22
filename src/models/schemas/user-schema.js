@@ -1,20 +1,22 @@
 const mongoose = require('mongoose');
-const UserRole = require('../../constants');
-const Schema = mongoose.Schema;
+
+const { USER_ROLES } = require('../../constants');
+
+const { Schema } = mongoose;
 
 const UserSchema = new Schema({
   firstName: String,
   lastName: String,
   role: {
     type: String,
-    enum: [UserRole.Admin, UserRole.User],
-    default: UserRole.User
+    enum: [USER_ROLES.ADMIN, USER_ROLES.USER],
+    default: USER_ROLES.USER,
   },
   email: {
     type: String,
     index: true,
     unique: true,
-    required: true
+    required: true,
   },
   password: String,
   mobilePhone: String,
@@ -23,9 +25,9 @@ const UserSchema = new Schema({
     zipCode: String,
     street: String,
     country: String,
-    city: String
+    city: String,
   },
-  isActive: Boolean
+  isActive: Boolean,
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = UserSchema;

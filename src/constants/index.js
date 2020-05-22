@@ -1,3 +1,8 @@
-const UserRole = Object.freeze({'Admin': 'admin', 'User' : 'user'});
+const USER_ROLES = {
+  ADMIN: 'admin',
+  USER: 'user',
+};
 
-module.exports = UserRole;
+module.exports = {
+  USER_ROLES,
+};
