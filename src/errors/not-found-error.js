@@ -5,7 +5,7 @@ class NotFoundError extends CustomError {
   constructor(message) {
     super({
       message,
-      status: HttpStatus.NotFoundError
+      status: HttpStatus.NOT_FOUND
     });
   }
 }
