@@ -16,7 +16,7 @@ async function deleteFavorite(req, res, next) {
       throw new NotfoundError('Item not found');
     }
 
-    return res.status(200).json({ results: favoriteData });
+    return res.status(200).json({ data: favoriteData });
   } catch (error) {
     return next(error);
   }
@@ -31,7 +31,7 @@ async function getFavorites(req, res, next) {
       .limit(limit)
       .skip(skip);
 
-    return res.status(200).json({ results: favorites });
+    return res.status(200).json({ data: favorites });
   } catch (error) {
     return next(error);
   }
@@ -49,7 +49,7 @@ async function addFavoriteProduct(req, res, next) {
     if (!favoriteData) {
       throw new NotfoundError('Not found');
     }
-    return res.status(200).json({ results: favoriteData });
+    return res.status(200).json({ data: favoriteData });
   } catch (error) {
     return next(error);
   }

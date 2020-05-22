@@ -24,7 +24,7 @@ async function createProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories,
+      category,
     } = req.body;
     const userId = req.userData._id;
     const product = await ProductModel.create({
@@ -39,10 +39,10 @@ async function createProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories,
+      category,
       userId,
     });
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }
@@ -59,7 +59,7 @@ async function getProduct(req, res, next) {
     }
 
     return res.status(200).json({
-      result: product,
+      data: product,
     });
   } catch (error) {
     return next(error);
@@ -75,7 +75,7 @@ async function getProducts(req, res, next) {
     ]);
 
     return res.status(200).json({
-      results: products,
+      data: products,
       total,
     });
   } catch (error) {
@@ -124,7 +124,7 @@ async function updateProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories,
+      category,
     } = req.body;
 
     const updatedFields = {
@@ -141,7 +141,7 @@ async function updateProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      $addToSet: { subCategories: [...subCategories] },
+      category,
     };
     const update = removeObjectUndefinedValue(updatedFields);
 
@@ -151,7 +151,7 @@ async function updateProduct(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }

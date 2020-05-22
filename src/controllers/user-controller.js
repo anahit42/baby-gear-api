@@ -59,7 +59,7 @@ async function getUsers(req, res, next) {
     ]);
 
     return res.status(200).json({
-      results: users,
+      data: users,
       total,
     });
   } catch (error) {
@@ -140,7 +140,7 @@ async function updateUser(req, res, next) {
     await UserModel.updateOne({ _id: userId }, updateFields);
 
     return res.status(200).json({
-      results: 'User Updated!',
+      data: 'User Updated!',
     });
   } catch (error) {
     return next(error);
