@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const OrderSchema = new Schema({
   ownerId: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
   productId: {
     type: Schema.Types.ObjectId,
-    ref: 'Product'
+    ref: 'Product',
   },
   quantity: Number,
   transactionId: {
@@ -18,19 +18,19 @@ const OrderSchema = new Schema({
   deliveryStatus: {
     type: String,
     enum: ['pending', 'shipped', 'delivered'],
-    default: 'pending'
+    default: 'pending',
   },
   complaints: [{
     reason: {
       type: String,
-      enum: ['productQuality', 'failedDelivery']
+      enum: ['productQuality', 'failedDelivery'],
     },
-    comments: String
+    comments: String,
   }],
   status: {
     type: String,
-    enum: ['paid', 'pending', 'failed', 'expired']
-  }
+    enum: ['paid', 'pending', 'failed', 'expired'],
+  },
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = OrderSchema;

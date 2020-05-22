@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const FavoritesSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
-  products: [{ type: Schema.Types.ObjectId }]
+  products: [{ type: Schema.Types.ObjectId }],
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = FavoritesSchema;

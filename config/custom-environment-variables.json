@@ -2,14 +2,15 @@
   "jwt": {
     "secret": "JWT_SECRET"
   },
+  "db": {
+    "connection": "MONGO_CONNECTION_STRING"
+  },
   "admin" : {
     "token": "ADMIN_TOKEN"
   },
   "aws": {
     "accessKeyId": "AWS_ACCESS_ID",
     "secretAccessKey": "AWS_SECRET_KEY",
-    "accessKey": "AWS_ACCESS_ID",
-    "secretKey": "AWS_SECRET_KEY",
     "bucketName": "BUCKET_NAME"
   }
 }

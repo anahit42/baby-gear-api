@@ -1,48 +1,40 @@
-const mongoose = require('mongoose');
 const config = require('config');
-const ValidationError = require('../../errors/validation-error');
-const { handleErrorDetails } = require('./handlers');
 const { FavoriteSchemas } = require('./schemas');
+const { handleErrorDetails } = require('./handlers');
+
 const validationOptions = config.get('validation.options');
-function validateProductId (req, res, next){
-  const { productId } = req.params;
 
-  if(!mongoose.Types.ObjectId.isValid(productId))
-    return next(new ValidationError('Invalid product Id'));
-
-  return next();
-}
-
-function validatePaging (req, res, next){
-  const { limit, skip } = req.query;
-
-  const convertedLimit = limit * 1;
-  const convertedSkip = skip * 1;
-
-  if(typeof convertedLimit != 'number' || (isNaN(convertedLimit) && limit !== undefined))
-    return next(new ValidationError('Invalid paramenetrs'));
-  else
-    req.query.limit = !limit ? limit : convertedLimit;
-
-
-  if(typeof convertedSkip != 'number' || (isNaN(convertedSkip) && skip !== undefined))
-    return next(new ValidationError('Invalid paramenetrs'));
-  else
-    req.query.skip = !skip ? skip : convertedSkip;
+function validateGetFavorite(req, res, next) {
+  const { error } = FavoriteSchemas.favoriteGetSingle.validate(req, validationOptions);
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
 
   return next();
 }
 
-function validateAddFavoriteProduct(req, res, next)  {
+function validateListFavorites(req, res, next) {
+  const { error } = FavoriteSchemas.favoriteList.validate(req, validationOptions);
+
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
+
+  return next();
+}
+
+function validateAddFavoriteProduct(req, res, next) {
   const { error } = FavoriteSchemas.addFavoriteProductSchemas.validate(req, validationOptions);
 
   if (error) {
     return handleErrorDetails(error, next);
   }
+
   return next();
 }
+
 module.exports = {
-  validatePaging,
-  validateProductId,
-  validateAddFavoriteProduct
+  validateAddFavoriteProduct,
+  validateGetFavorite,
+  validateListFavorites,
 };
