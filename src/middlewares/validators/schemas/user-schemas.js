@@ -43,9 +43,17 @@ const updateUserSchema = Joi.object({
   })
 });
 
+const limitSkipSchema = Joi.object({
+  query: Joi.object({
+    limit: Joi.number().positive(),
+    skip: Joi.number().positive()
+  })
+});
+
 module.exports = {
   registerUserSchema,
   updateUserSchema,
   userIdSchema,
-  loginUserSchema
+  loginUserSchema,
+  limitSkipSchema
 };

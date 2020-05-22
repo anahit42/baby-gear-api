@@ -17,17 +17,13 @@ function removeUndefinedValues(object) {
   return object;
 }
 
-async function getUser (req, res, next) {
+async function getUser(req, res, next) {
   const { userId } = req.params;
-  const { authorization } = req.headers;
 
   try {
-    const decoded = await JWT.verify(authorization, jwt.secret);
 
-    if (userId !== decoded._id.toString()) {
-      return res.status(401).json({
-        error: 'Not Authorized'
-      });
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('Not Authorized!');
     }
 
     const user = await UserModel.findOne({ _id: userId }).select({
@@ -46,10 +42,18 @@ async function getUser (req, res, next) {
 }
 
 async function getUsers(req, res, next) {
-  const { limit, skip } = req.query;
+  let { limit, skip } = req.query;
+
+  limit = parseInt(limit);
+  skip = parseInt(skip);
 
   try {
-    const [ users, total ] = await Promise.all([
+
+    if (req.userData.role !== 'admin') {
+      return next(new ForbiddenError('Access to the requested resource is forbidden.'));
+    }
+
+    const [users, total] = await Promise.all([
       UserModel.find({}).select({
         password: 0,
         email: 0,
@@ -63,12 +67,13 @@ async function getUsers(req, res, next) {
       results: users,
       total
     });
+
   } catch (error) {
     return next(error);
   }
 }
 
-async function uploadProfilePic (req, res, next) {
+async function uploadProfilePic(req, res, next) {
   try {
     const { file } = req;
     const { userId } = req.params;
@@ -93,7 +98,7 @@ async function uploadProfilePic (req, res, next) {
       secret: secretKey,
       fileBuffer: file.buffer,
       fileMimeType: fileType.mime,
-      distFilePath: `${userId}/${file.originalname}`,
+      distFilePath: `${ userId }/${ file.originalname }`,
     });
 
     const url = s3Lib.getSignedUrl({
@@ -132,7 +137,7 @@ async function updateUser(req, res, next) {
       throw new ForbiddenError('Not Authorized!');
     }
 
-    if(email) {
+    if (email) {
       const existUser = await UserModel.exists({ email });
 
       if (existUser) {
