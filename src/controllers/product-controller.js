@@ -4,21 +4,11 @@ const Promise = require('bluebird');
 
 const { ProductModel } = require('../models');
 const { NotFoundError, ForbiddenError } = require('../errors');
+const { removeObjectUndefinedValue, formatUpdateSubDocument } = require('../utils');
+
 const S3Lib = require('../libs/s3-lib');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
-
-function withoutUndefinedValue(object) {
-  Object.keys(object).forEach((key) => !object[key] && delete object[key]);
-  return object;
-}
-
-function updatedSubDocument(propertyValue = {}, propertyKey) {
-  return Object.keys(propertyValue).reduce((updatedObject, key) => {
-    updatedObject[`${propertyKey}.${key}`] = propertyValue[key];
-    return updatedObject;
-  }, {});
-}
 
 async function createProduct(req, res, next) {
   try {
@@ -142,8 +132,8 @@ async function updateProduct(req, res, next) {
       description,
       price,
       $set: {
-        ...updatedSubDocument(properties, 'properties'),
-        ...updatedSubDocument(customProperties, 'customProperties'),
+        ...formatUpdateSubDocument(properties, 'properties'),
+        ...formatUpdateSubDocument(customProperties, 'customProperties'),
       },
       condition,
       status,
@@ -153,7 +143,7 @@ async function updateProduct(req, res, next) {
       issueDate,
       $addToSet: { subCategories: [...subCategories] },
     };
-    const update = withoutUndefinedValue(updatedFields);
+    const update = removeObjectUndefinedValue(updatedFields);
 
     const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });
 
