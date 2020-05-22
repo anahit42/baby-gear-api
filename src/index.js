@@ -11,6 +11,7 @@ const mongodb = require('./storages/mongodb');
 mongodb.init();
 
 const AuthMiddleware = require('./middlewares/auth-middleware');
+const QueryMiddleware = require('./middlewares/query-middleware');
 
 const apiPort = config.get('api.port');
 
@@ -24,6 +25,8 @@ const {
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+app.use(QueryMiddleware.parseQueryNumbers);
 
 app.use('/auth', authRouter);
 
