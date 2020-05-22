@@ -23,7 +23,18 @@ function validateListFavorites(req, res, next) {
   return next();
 }
 
+function validateAddFavoriteProduct(req, res, next) {
+  const { error } = FavoriteSchemas.addFavoriteProductSchemas.validate(req, validationOptions);
+
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
+
+  return next();
+}
+
 module.exports = {
+  validateAddFavoriteProduct,
   validateGetFavorite,
   validateListFavorites,
 };
