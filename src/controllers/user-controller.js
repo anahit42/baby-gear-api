@@ -32,6 +32,15 @@ async function getUser(req, res, next) {
       address: 0,
     });
 
+    if (user.image) {
+      user.image = s3Lib.getSignedUrl({
+        bucket: bucketName,
+        key: accessKeyId,
+        secret: secretAccessKey,
+        distFileKey: user.image,
+      });
+    }
+
     return res.status(200).json({
       user,
     });
@@ -57,6 +66,17 @@ async function getUsers(req, res, next) {
       }).limit(limit).skip(skip),
       UserModel.countDocuments({}),
     ]);
+
+    users.forEach(users, (user) => {
+      if (user.image) {
+        user.image = s3Lib.getSignedUrl({
+          bucket: bucketName,
+          key: accessKeyId,
+          secret: secretAccessKey,
+          distFileKey: user.image,
+        });
+      }
+    });
 
     return res.status(200).json({
       data: users,
@@ -94,18 +114,20 @@ async function uploadProfilePic(req, res, next) {
       distFilePath: `${userId}/${file.originalname}`,
     });
 
+    const fileKey = data.Key || data.key;
+
+    await UserModel.findByIdAndUpdate(userId, { image: fileKey });
+
     const url = s3Lib.getSignedUrl({
       bucket: bucketName,
       key: accessKeyId,
       secret: secretAccessKey,
-      distFileKey: data.Key || data.key,
+      distFileKey: fileKey,
       mimeType: fileType.mime,
     });
 
-    await UserModel.findByIdAndUpdate(userId, { image: url });
-
     return res.status(200).json({
-      image: data.Key || data.key,
+      image: url,
     });
   } catch (error) {
     return next(error);
