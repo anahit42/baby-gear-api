@@ -2,25 +2,26 @@ const config = require('config');
 const FileType = require('file-type');
 const Promise = require('bluebird');
 
-const { ProductModel } = require('../models');
-const { NotFoundError, ValidationError } = require('../errors');
 const S3Lib = require('../libs/s3-lib');
+
+const { ProductModel } = require('../models');
+const { NotFoundError } = require('../errors');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
 function withoutUndefinedValue(object) {
-  Object.keys(object).forEach(key => !object[key] && delete object[key]);
+  Object.keys(object).forEach((key) => !object[key] && delete object[key]);
   return object;
 }
 
 function updatedSubDocument(propertyValue = {}, propertyKey) {
-  return  Object.keys(propertyValue).reduce((updatedObject,key) => {
+  return Object.keys(propertyValue).reduce((updatedObject, key) => {
     updatedObject[`${propertyKey}.${key}`] = propertyValue[key];
     return updatedObject;
-  },{});
+  }, {});
 }
 
-async function createProduct (req, res, next) {
+async function createProduct(req, res, next) {
   try {
     const {
       name,
@@ -34,7 +35,7 @@ async function createProduct (req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories
+      subCategories,
     } = req.body;
     const userId = req.userData._id;
     const product = await ProductModel.create({
@@ -50,15 +51,15 @@ async function createProduct (req, res, next) {
       country,
       issueDate,
       subCategories,
-      userId
+      userId,
     });
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }
 }
 
-async function getProduct (req, res, next) {
+async function getProduct(req, res, next) {
   const { productId } = req.params;
 
   try {
@@ -69,25 +70,24 @@ async function getProduct (req, res, next) {
     }
 
     return res.status(200).json({
-      result: product
+      data: product,
     });
   } catch (error) {
     return next(error);
   }
 }
 
-async function getProducts (req,res,next) {
+async function getProducts(req, res, next) {
   const { limit, skip } = req.query;
   try {
-    if(isNaN(limit) | isNaN(skip) | limit < 0 | skip < 0 | limit % 1 != 0 | skip % 1 != 0) {
-      return next(new ValidationError('Invalid parameter'));
-    }
-    const results = {};
-    results.total = await ProductModel.countDocuments();
-    results.data = await ProductModel.find().limit(parseInt(limit)).skip(parseInt(skip));
+    const [products, total] = await Promise.all([
+      ProductModel.countDocuments(),
+      ProductModel.find().limit(limit).skip(skip),
+    ]);
 
     return res.status(200).json({
-      results
+      data: products,
+      total,
     });
   } catch (error) {
     return next(error);
@@ -98,7 +98,7 @@ async function updateProduct(req, res, next) {
   try {
     const { productId } = req.params;
     const userId = req.userData._id;
-    const findQuery  = { _id: productId, userId };
+    const findQuery = { _id: productId, userId };
     const {
       name,
       description,
@@ -111,16 +111,16 @@ async function updateProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      subCategories
+      subCategories,
     } = req.body;
 
     const updatedFields = {
       name,
       description,
       price,
-      $set : {
+      $set: {
         ...updatedSubDocument(properties, 'properties'),
-        ...updatedSubDocument(customProperties, 'customProperties')
+        ...updatedSubDocument(customProperties, 'customProperties'),
       },
       condition,
       status,
@@ -128,19 +128,19 @@ async function updateProduct(req, res, next) {
       brand,
       country,
       issueDate,
-      $addToSet: { 'subCategories' : [...subCategories] }
+      $addToSet: { subCategories: [...subCategories] },
     };
     const update = withoutUndefinedValue(updatedFields);
 
-    const product = await ProductModel.findOneAndUpdate(findQuery, update, { 'new': true});
+    const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });
 
-    if(!product){
+    if (!product) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
-    return  next(error);
+    return next(error);
   }
 }
 
@@ -154,8 +154,8 @@ async function uploadImages(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    let distFileKeys = [];
-    let urls = [];
+    const distFileKeys = [];
+    const urls = [];
 
     // Loop each file
     await Promise.map(req.files, async (file) => {
@@ -168,7 +168,7 @@ async function uploadImages(req, res, next) {
           secret: secretAccessKey,
           fileBuffer: file.buffer,
           fileMimeType: fileType.mime,
-          distFilePath: `${productId}/${file.originalname}`
+          distFilePath: `${productId}/${file.originalname}`,
         });
         distFileKeys.push(data.key);
 
@@ -180,9 +180,9 @@ async function uploadImages(req, res, next) {
           mimeType: fileType.mime,
         });
         urls.push(url);
-
       } catch (error) {
-        console.log(error);
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     });
 
@@ -191,9 +191,9 @@ async function uploadImages(req, res, next) {
 
     return res.status(200).json({
       message: 'Success',
-      imageUrls: urls
+      data: urls,
     });
-  } catch(error) {
+  } catch (error) {
     return next(error);
   }
 }
