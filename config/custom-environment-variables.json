@@ -2,6 +2,9 @@
   "jwt": {
     "secret": "JWT_SECRET"
   },
+  "db": {
+    "connection": "MONGO_CONNECTION_STRING"
+  },
   "admin" : {
     "token": "ADMIN_TOKEN"
   },
