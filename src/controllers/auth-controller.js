@@ -1,15 +1,11 @@
 const HttpStatus = require('http-status-codes');
-const NotFoundError = require('../errors/not-found-error');
-const ConflictError = require('../errors/conflict-error');
 
-const { UserModel } = require('../models');
 const CryptoLib = require('../libs/crypto-lib');
 const TokenLib = require('../libs/token-lib');
+
+const { NotFoundError, ConflictError } = require('../errors');
+const { UserModel } = require('../models');
 const { USER_ROLES } = require('../constants');
-
-const duplicateUserError = 'This user already exists, please try another one.';
-const userNotFoundError = `${UserModel.collection.collectionName} ${HttpStatus.NOT_FOUND}`;
-
 
 async function login(req, res, next) {
   try {
@@ -17,21 +13,23 @@ async function login(req, res, next) {
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      throw new NotFoundError(userNotFoundError);
+      throw new NotFoundError('User not found.');
     }
 
     const matches = await CryptoLib.comparePassword(password, user.password);
 
     if (!matches) {
-      throw new NotFoundError(userNotFoundError);
+      throw new NotFoundError('User not found.');
     }
 
     const token = await TokenLib.createUserToken({ _id: user._id, email, role: user.role });
 
     return res.status(HttpStatus.OK).json({
-      _id: user._id,
-      email,
-      token,
+      data: {
+        _id: user._id,
+        email,
+        token,
+      },
     });
   } catch (error) {
     return next(error);
@@ -45,7 +43,7 @@ async function register(req, res, next) {
     const user = await UserModel.exists({ email });
 
     if (user) {
-      throw new ConflictError(duplicateUserError);
+      throw new ConflictError('This user already exists, please try another one.');
     }
 
     const {
@@ -68,7 +66,7 @@ async function register(req, res, next) {
       isActive: true,
     });
 
-    return res.status(HttpStatus.OK).json({ email });
+    return res.status(HttpStatus.OK).json({ data: { email } });
   } catch (error) {
     return next(error);
   }
@@ -80,7 +78,7 @@ async function registerAdmin(req, res, next) {
     const user = await UserModel.exists({ email });
 
     if (user) {
-      throw new ConflictError(duplicateUserError);
+      throw new ConflictError('This user already exists, please try another one.');
     }
 
     const { adminToken } = req.headers;
@@ -108,7 +106,7 @@ async function registerAdmin(req, res, next) {
       isActive: true,
     });
 
-    return res.status(HttpStatus.OK).json({ email });
+    return res.status(HttpStatus.OK).json({ data: { email } });
   } catch (error) {
     return next(error);
   }
