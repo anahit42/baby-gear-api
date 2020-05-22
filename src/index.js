@@ -29,13 +29,12 @@ app.use(bodyParser.json());
 app.use(QueryMiddleware.parseQueryNumbers);
 
 app.use('/auth', authRouter);
+app.use('/categories', categoryRouter);
+app.use('/products', productRouter);
 
 app.use(AuthMiddleware.authorize);
-
-app.use('/categories', categoryRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/orders', orderRouter);
-app.use('/products', productRouter);
 app.use('/users', userRouter);
 
 app.use((req, res, next) => next(new NotFoundError('Path not found.')));
@@ -57,6 +56,7 @@ app.use((error, req, res, next) => {
       message: error.message,
     });
   }
+
   return res.status(500).json({
     success: false,
     status: 500,
