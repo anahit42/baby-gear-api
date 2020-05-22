@@ -1,3 +1,4 @@
+const JWT = require('jsonwebtoken');
 const config = require('config');
 const FileType = require('file-type');
 
@@ -6,6 +7,7 @@ const { ValidationError, ConflictError, ForbiddenError } = require('../errors');
 const CryptoLib = require('../libs/crypto-lib');
 const s3Lib = require('../libs/s3-lib');
 
+const jwt = config.get('jwt');
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
 const getFileType = async (file) => FileType.fromBuffer(file.buffer);
@@ -31,7 +33,7 @@ async function getUser(req, res, next) {
     });
 
     return res.status(200).json({
-      data: user,
+      user,
     });
   } catch (error) {
     return next(error);
@@ -57,7 +59,7 @@ async function getUsers(req, res, next) {
     ]);
 
     return res.status(200).json({
-      data: users,
+      results: users,
       total,
     });
   } catch (error) {
@@ -69,9 +71,12 @@ async function uploadProfilePic(req, res, next) {
   try {
     const { file } = req;
     const { userId } = req.params;
+    const { authorization } = req.headers;
 
-    if (userId !== req.userData._id) {
-      throw new ForbiddenError('Access to the requested resource is forbidden.');
+    const decoded = await JWT.verify(authorization, jwt.secret);
+
+    if (userId !== decoded._id.toString()) {
+      return next(new ForbiddenError('Access to the requested resource is forbidden.'));
     }
 
     const fileType = await getFileType(file);
@@ -88,20 +93,19 @@ async function uploadProfilePic(req, res, next) {
       fileMimeType: fileType.mime,
       distFilePath: `${userId}/${file.originalname}`,
     });
-    const fileKey = data.Key || data.key;
-
-    await UserModel.findByIdAndUpdate(userId, { image: fileKey });
 
     const url = s3Lib.getSignedUrl({
       bucket: bucketName,
       key: accessKeyId,
       secret: secretAccessKey,
-      distFileKey: fileKey,
+      distFileKey: data.Key || data.key,
       mimeType: fileType.mime,
     });
 
+    await UserModel.findByIdAndUpdate(userId, { image: url });
+
     return res.status(200).json({
-      data: { url },
+      image: data.Key || data.key,
     });
   } catch (error) {
     return next(error);
@@ -136,7 +140,7 @@ async function updateUser(req, res, next) {
     await UserModel.updateOne({ _id: userId }, updateFields);
 
     return res.status(200).json({
-      data: { firstName, lastName, email },
+      results: 'User Updated!',
     });
   } catch (error) {
     return next(error);

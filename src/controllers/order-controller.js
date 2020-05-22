@@ -1,5 +1,5 @@
 const { OrderModel } = require('../models');
-const { NotfoundError } = require('../errors');
+const NotfoundError = require('../errors/not-found-error');
 
 async function getOrder(req, res, next) {
   const { orderId } = req.params;
@@ -11,7 +11,7 @@ async function getOrder(req, res, next) {
       throw new NotfoundError('Item not found');
     }
 
-    return res.status(200).json({ data: order });
+    return res.status(200).json({ result: order });
   } catch (error) {
     return next(error);
   }
@@ -22,12 +22,9 @@ async function getOrders(req, res, next) {
   const userId = req.userData._id;
 
   try {
-    const [orders, total] = await Promise.all(
-      OrderModel.find({ ownerId: userId }).limit(limit).skip(skip),
-      OrderModel.countDocuments({ ownerId: userId })
-    );
+    const orders = await OrderModel.find({ ownerId: userId }).limit(limit).skip(skip);
 
-    return res.status(200).json({ data: orders, total });
+    return res.status(200).json({ results: orders });
   } catch (error) {
     return next(error);
   }

@@ -2,10 +2,9 @@ const config = require('config');
 const FileType = require('file-type');
 const Promise = require('bluebird');
 
-const S3Lib = require('../libs/s3-lib');
-
 const { ProductModel } = require('../models');
-const { NotFoundError } = require('../errors');
+const { NotFoundError, ForbiddenError } = require('../errors');
+const S3Lib = require('../libs/s3-lib');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
@@ -53,7 +52,7 @@ async function createProduct(req, res, next) {
       subCategories,
       userId,
     });
-    return res.status(200).json({ data: product });
+    return res.status(200).json({ result: product });
   } catch (error) {
     return next(error);
   }
@@ -70,7 +69,7 @@ async function getProduct(req, res, next) {
     }
 
     return res.status(200).json({
-      data: product,
+      result: product,
     });
   } catch (error) {
     return next(error);
@@ -83,6 +82,30 @@ async function getProducts(req, res, next) {
     const [products, total] = await Promise.all([
       ProductModel.countDocuments(),
       ProductModel.find().limit(limit).skip(skip),
+    ]);
+
+    return res.status(200).json({
+      results: products,
+      total,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function getUserProducts(req, res, next) {
+  const { userId } = req.params;
+  const { _id } = req.userData;
+  const { skip, limit } = req.query;
+
+  try {
+    if (userId !== _id.toString()) {
+      throw new ForbiddenError('You\'re not allowed to view this resource');
+    }
+
+    const [products, total] = await Promise.all([
+      ProductModel.find({ userId }).limit(limit).skip(skip),
+      ProductModel.countDocuments(),
     ]);
 
     return res.status(200).json({
@@ -138,7 +161,7 @@ async function updateProduct(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({ data: product });
+    return res.status(200).json({ result: product });
   } catch (error) {
     return next(error);
   }
@@ -191,7 +214,7 @@ async function uploadImages(req, res, next) {
 
     return res.status(200).json({
       message: 'Success',
-      data: urls,
+      imageUrls: urls,
     });
   } catch (error) {
     return next(error);
@@ -203,5 +226,6 @@ module.exports = {
   updateProduct,
   getProducts,
   getProduct,
+  getUserProducts,
   uploadImages,
 };

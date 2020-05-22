@@ -1,5 +1,4 @@
 const config = require('config');
-
 const { FavoriteSchemas } = require('./schemas');
 const { handleErrorDetails } = require('./handlers');
 

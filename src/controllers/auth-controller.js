@@ -13,7 +13,7 @@ async function login(req, res, next) {
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      throw new NotFoundError('User not found');
+      throw new NotFoundError('User not found.');
     }
 
     const matches = await CryptoLib.comparePassword(password, user.password);
@@ -43,7 +43,7 @@ async function register(req, res, next) {
     const user = await UserModel.exists({ email });
 
     if (user) {
-      throw new ConflictError('Provide different email address.');
+      throw new ConflictError('This user already exists, please try another one.');
     }
 
     const {
@@ -78,7 +78,7 @@ async function registerAdmin(req, res, next) {
     const user = await UserModel.exists({ email });
 
     if (user) {
-      throw new ConflictError('Provide different email address.');
+      throw new ConflictError('This user already exists, please try another one.');
     }
 
     const { adminToken } = req.headers;
