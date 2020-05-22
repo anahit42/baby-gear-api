@@ -25,4 +25,8 @@ const { deleteProduct } = require('../controllers/product-controller');
 
 router.delete('/:productId', deleteProduct);
 
+const { deleteProduct } = require('../controllers/product-controller');
+
+router.delete('/:productId', deleteProduct);
+
 module.exports = router;

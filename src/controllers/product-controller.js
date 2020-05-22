@@ -212,14 +212,14 @@ async function uploadImages(req, res, next) {
 }
 
 async function deleteProduct (req, res, next) {
+
   const { productId } = req.params;
   const { authorization } = req.headers;
 
   try {
     const decoded = await JWT.verify(authorization, jwt.secret);
 
-    //const product = await ProductModel.findOne({ _id: productId });
-    const product = await ProductModel.findOneAndUpdate({ _id: productId, userId: res.userData._id ?.toString(), { status: 'deleted' });
+    const product = await ProductModel.findOne({ _id: productId });
 
     if (product.userId.toString() !== decoded._id.toString()) {
       return res.status(401).json({
@@ -235,7 +235,6 @@ async function deleteProduct (req, res, next) {
   } catch (error) {
     return next(error);
   }
-}
 
 module.exports = {
   createProduct,
