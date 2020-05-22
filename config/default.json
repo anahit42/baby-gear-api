@@ -13,7 +13,7 @@
   },
   "jwt": {
     "options": {
-      "expiresIn": 300
+      "expiresIn": 365000
     }
   },
   "validation": {
