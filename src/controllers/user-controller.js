@@ -93,19 +93,20 @@ async function uploadProfilePic(req, res, next) {
       fileMimeType: fileType.mime,
       distFilePath: `${userId}/${file.originalname}`,
     });
+    const fileKey = data.Key || data.key;
+
+    await UserModel.findByIdAndUpdate(userId, { image: fileKey });
 
     const url = s3Lib.getSignedUrl({
       bucket: bucketName,
       key: accessKeyId,
       secret: secretAccessKey,
-      distFileKey: data.Key || data.key,
+      distFileKey: fileKey,
       mimeType: fileType.mime,
     });
 
-    await UserModel.findByIdAndUpdate(userId, { image: url });
-
     return res.status(200).json({
-      image: data.Key || data.key,
+      data: { url },
     });
   } catch (error) {
     return next(error);
@@ -140,7 +141,7 @@ async function updateUser(req, res, next) {
     await UserModel.updateOne({ _id: userId }, updateFields);
 
     return res.status(200).json({
-      results: 'User Updated!',
+      data: { firstName, lastName, email },
     });
   } catch (error) {
     return next(error);

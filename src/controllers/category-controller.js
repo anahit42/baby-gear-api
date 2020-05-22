@@ -10,7 +10,7 @@ async function getCategories(req, res, next) {
     ]);
 
     return res.status(200).json({
-      result: categories,
+      data: categories,
       total,
     });
   } catch (error) {

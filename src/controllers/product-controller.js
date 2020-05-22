@@ -2,9 +2,10 @@ const config = require('config');
 const FileType = require('file-type');
 const Promise = require('bluebird');
 
+const S3Lib = require('../libs/s3-lib');
+
 const { ProductModel } = require('../models');
 const { NotFoundError } = require('../errors');
-const S3Lib = require('../libs/s3-lib');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
@@ -52,7 +53,7 @@ async function createProduct(req, res, next) {
       subCategories,
       userId,
     });
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }
@@ -69,7 +70,7 @@ async function getProduct(req, res, next) {
     }
 
     return res.status(200).json({
-      result: product,
+      data: product,
     });
   } catch (error) {
     return next(error);
@@ -85,7 +86,7 @@ async function getProducts(req, res, next) {
     ]);
 
     return res.status(200).json({
-      results: products,
+      data: products,
       total,
     });
   } catch (error) {
@@ -137,7 +138,7 @@ async function updateProduct(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({ result: product });
+    return res.status(200).json({ data: product });
   } catch (error) {
     return next(error);
   }
@@ -190,7 +191,7 @@ async function uploadImages(req, res, next) {
 
     return res.status(200).json({
       message: 'Success',
-      imageUrls: urls,
+      data: urls,
     });
   } catch (error) {
     return next(error);
