@@ -1,6 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
+const AuthMiddleware = require('../middlewares/auth-middleware');
 
 const { uploadImage } = require('../libs/multer-lib');
 
@@ -13,8 +14,10 @@ const {
 } = require('../controllers/product-controller');
 
 router.get('/', getProducts);
-router.post('/', validateCreateProduct, createProduct);
 router.get('/:productId', validateProductId, getProduct);
+
+router.use(AuthMiddleware.authorize);
+router.post('/', validateCreateProduct, createProduct);
 router.patch('/:productId', validateUpdateProduct, updateProduct);
 router.post('/:productId/images', validateProductId, uploadImage.array('productImage', 12), uploadImages);
 

@@ -2,7 +2,7 @@ const config = require('config');
 const JWT = require('jsonwebtoken');
 
 const HttpStatus = require('http-status-codes');
-const { ForbiddenError } = require('../errors');
+const { ForbiddenError, UnAuthorizedError } = require('../errors');
 
 const adminToken = config.get('admin.token');
 const jwtSecret = config.get('jwt.secret');
@@ -14,6 +14,14 @@ async function createUserToken(userInfo) {
   return JWT.sign({ _id, email, role }, jwtSecret, jwtOptions);
 }
 
+async function verifyToken(token) {
+  try {
+    return await JWT.verify(token, jwtSecret);
+  } catch (error) {
+    throw new UnAuthorizedError(HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED));
+  }
+}
+
 function checkAdminToken(token) {
   if (token !== adminToken) {
     throw new ForbiddenError(HttpStatus.getStatusText(HttpStatus.FORBIDDEN));
@@ -23,4 +31,5 @@ function checkAdminToken(token) {
 module.exports = {
   createUserToken,
   checkAdminToken,
+  verifyToken,
 };
