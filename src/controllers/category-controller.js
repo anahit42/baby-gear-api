@@ -1,4 +1,23 @@
-// eslint-disable-next-line no-unused-vars
 const { CategoryModel } = require('../models');
 
-module.exports = {};
+async function getCategories(req, res, next) {
+  try {
+    const { limit, skip } = req.query;
+
+    const [categories, total] = await Promise.all([
+      CategoryModel.find().limit(limit).skip(skip),
+      CategoryModel.countDocuments(),
+    ]);
+
+    return res.status(200).json({
+      result: categories,
+      total,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = {
+  getCategories,
+};

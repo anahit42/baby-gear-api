@@ -1,10 +1,11 @@
 const JWT = require('jsonwebtoken');
 const config = require('config');
-const jwtSecret = config.get('jwt.secret');
-const { UnAuthorizedError } = require('../errors');
-const HttpStatus = require('http-status-codes');
 
-async function authorize (req, res, next) {
+const jwtSecret = config.get('jwt.secret');
+const HttpStatus = require('http-status-codes');
+const { UnAuthorizedError } = require('../errors');
+
+async function authorize(req, res, next) {
   try {
     const { authorization } = req.headers;
 
@@ -21,5 +22,5 @@ async function authorize (req, res, next) {
 }
 
 module.exports = {
-  authorize
+  authorize,
 };

@@ -1,37 +1,29 @@
-const mongoose = require('mongoose');
+const config = require('config');
+const { FavoriteSchemas } = require('./schemas');
+const { handleErrorDetails } = require('./handlers');
 
-const ValidationError = require('../../errors/validation-error');
+const validationOptions = config.get('validation.options');
 
-function validateProductId (req, res, next){
-  const { productId } = req.params;
-
-  if(!mongoose.Types.ObjectId.isValid(productId))
-    return next(new ValidationError('Invalid product Id'));
+function validateGetFavorite(req, res, next) {
+  const { error } = FavoriteSchemas.favoriteGetSingle.validate(req, validationOptions);
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
 
   return next();
 }
 
-function validatePaging (req, res, next){
-  const { limit, skip } = req.query;
+function validateListFavorites(req, res, next) {
+  const { error } = FavoriteSchemas.favoriteList.validate(req, validationOptions);
 
-  const convertedLimit = limit * 1;
-  const convertedSkip = skip * 1;
-
-  if(typeof convertedLimit != 'number' || (isNaN(convertedLimit) && limit !== undefined))
-    return next(new ValidationError('Invalid paramenetrs'));
-  else
-    req.query.limit = !limit ? limit : convertedLimit;
-
-
-  if(typeof convertedSkip != 'number' || (isNaN(convertedSkip) && skip !== undefined))
-    return next(new ValidationError('Invalid paramenetrs'));
-  else
-    req.query.skip = !skip ? skip : convertedSkip;
+  if (error) {
+    return handleErrorDetails(error, next);
+  }
 
   return next();
 }
 
 module.exports = {
-  validatePaging,
-  validateProductId
+  validateGetFavorite,
+  validateListFavorites,
 };
