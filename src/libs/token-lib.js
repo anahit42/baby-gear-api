@@ -1,18 +1,19 @@
 const config = require('config');
 const JWT = require('jsonwebtoken');
+
 const jwtSecret = config.get('jwt.secret');
 const jwtOptions = config.get('jwt.options');
 const HttpStatus = require('http-status-codes');
 const ForbiddenError = require('../errors/forbidden-error');
 const UnAuthorizedError = require('../errors/unauthorized-error');
+
 const adminToken = config.get('admin.token');
 
 async function createUserToken(userInfo) {
-
   const {
     _id,
     email,
-    role
+    role,
   } = userInfo;
 
   return JWT.sign({ _id, email, role },
@@ -37,6 +38,5 @@ function checkAdminToken(token) {
 module.exports = {
   createUserToken,
   checkLoginToken,
-  checkAdminToken
+  checkAdminToken,
 };
-

@@ -1,12 +1,11 @@
 const config = require('config');
 const Joi = require('@hapi/joi');
-Joi.objectId = require('joi-objectid')(Joi);
 
 const validationOptions = config.get('validation.options');
 const { handleErrorDetails } = require('./handlers');
 const { ProductSchemas } = require('./schemas');
 
-function validateCreateProduct(req, res, next)  {
+function validateCreateProduct(req, res, next) {
   const { error } = ProductSchemas.productsCreateSchema.validate(req, validationOptions);
 
   if (error) {
@@ -16,7 +15,7 @@ function validateCreateProduct(req, res, next)  {
   return next();
 }
 
-function validateUpdateProduct (req, res, next) {
+function validateUpdateProduct(req, res, next) {
   const { error } = ProductSchemas.productsUpdateSchema.validate(req, validationOptions);
 
   if (error) {
@@ -30,7 +29,7 @@ function validateProductId(req, res, next) {
   const { productId } = req.params;
 
   const schema = Joi.object().keys({
-    productId: Joi.objectId()
+    productId: Joi.string().hex().length(24).required(),
   });
 
   const { error } = schema.validate({ productId });

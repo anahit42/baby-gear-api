@@ -1,9 +1,9 @@
 const config = require('config');
 
-const validationOptions = config.get('validation.options');
-
 const { UserSchemas } = require('./schemas');
 const { handleErrorDetails } = require('./handlers');
+
+const validationOptions = config.get('validation.options');
 
 function validateRegisterUser(req, res, next) {
   const { error } = UserSchemas.registerUserSchema.validate(req, validationOptions);
@@ -36,7 +36,6 @@ function validateUserId(req, res, next) {
 }
 
 function validateUpdateUser(req, res, next) {
-
   const { error } = UserSchemas.updateUserSchema.validate(req, validationOptions);
 
   if (error) {
@@ -47,10 +46,6 @@ function validateUpdateUser(req, res, next) {
 }
 
 function validateLimitSkip(req, res, next) {
-
-  req.query.limit = parseInt(req.query.limit);
-  req.query.skip = parseInt(req.query.skip);
-
   const { error } = UserSchemas.limitSkipSchema.validate(req, validationOptions);
 
   if (error) {
@@ -65,5 +60,5 @@ module.exports = {
   validateUpdateUser,
   validateUserId,
   validateLoginUser,
-  validateLimitSkip
+  validateLimitSkip,
 };

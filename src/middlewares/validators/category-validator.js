@@ -16,5 +16,5 @@ function validateGetCategories(req, res, next) {
 }
 
 module.exports = {
-  validateGetCategories
+  validateGetCategories,
 };

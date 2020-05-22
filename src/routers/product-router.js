@@ -1,14 +1,15 @@
 const express = require('express');
+
 const router = express.Router();
 
 const { uploadImage } = require('../libs/multer-lib');
 
 const {
-  validateProductId, validateCreateProduct, validateUpdateProduct
+  validateProductId, validateCreateProduct, validateUpdateProduct,
 } = require('../middlewares/validators/product-validator');
 
 const {
-  getProduct, getProducts, updateProduct, createProduct, uploadImages
+  getProduct, getProducts, updateProduct, createProduct, uploadImages,
 } = require('../controllers/product-controller');
 
 router.get('/', getProducts);

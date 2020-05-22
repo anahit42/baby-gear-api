@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 
 const { validateGetFavorite, validateListFavorites } = require('../middlewares/validators/favorite-validator');

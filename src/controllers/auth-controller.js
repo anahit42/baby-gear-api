@@ -5,13 +5,13 @@ const ConflictError = require('../errors/conflict-error');
 const { UserModel } = require('../models');
 const CryptoLib = require('../libs/crypto-lib');
 const TokenLib = require('../libs/token-lib');
-const AdminRole = require('../constants').Admin;
+const { USER_ROLES } = require('../constants');
 
 const duplicateUserError = 'This user already exists, please try another one.';
 const userNotFoundError = `${UserModel.collection.collectionName} ${HttpStatus.NOT_FOUND}`;
 
 
-async function login (req, res, next) {
+async function login(req, res, next) {
   try {
     const { email, password } = req.body;
     const user = await UserModel.findOne({ email });
@@ -31,16 +31,15 @@ async function login (req, res, next) {
     return res.status(HttpStatus.OK).json({
       _id: user._id,
       email,
-      token
+      token,
     });
   } catch (error) {
     return next(error);
   }
 }
 
-async function register (req, res, next) {
+async function register(req, res, next) {
   try {
-
     const { email } = req.body;
 
     const user = await UserModel.exists({ email });
@@ -54,10 +53,10 @@ async function register (req, res, next) {
       lastName,
       password,
       mobilePhone,
-      address
+      address,
     } = req.body;
 
-    const  passwordHash = await CryptoLib.hashPassword(password);
+    const passwordHash = await CryptoLib.hashPassword(password);
 
     await UserModel.create({
       firstName,
@@ -66,7 +65,7 @@ async function register (req, res, next) {
       password: passwordHash,
       mobilePhone,
       address,
-      isActive: true
+      isActive: true,
     });
 
     return res.status(HttpStatus.OK).json({ email });
@@ -93,20 +92,20 @@ async function registerAdmin(req, res, next) {
       lastName,
       password,
       mobilePhone,
-      address
+      address,
     } = req.body;
 
-    const  passwordHash = await CryptoLib.hashPassword(password);
+    const passwordHash = await CryptoLib.hashPassword(password);
 
     await UserModel.create({
       firstName,
       lastName,
-      role: AdminRole,
+      role: USER_ROLES.ADMIN,
       email,
       password: passwordHash,
       mobilePhone,
       address,
-      isActive: true
+      isActive: true,
     });
 
     return res.status(HttpStatus.OK).json({ email });
@@ -118,5 +117,5 @@ async function registerAdmin(req, res, next) {
 module.exports = {
   login,
   register,
-  registerAdmin
+  registerAdmin,
 };
