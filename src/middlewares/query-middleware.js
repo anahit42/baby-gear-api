@@ -4,7 +4,9 @@ class QueryMiddleware {
   static parseQueryNumbers(req, res, next) {
     if (req.query) {
       fieldNames.forEach((fieldName) => {
-        req.query[fieldName] = Number(req.query[fieldName]);
+        if (req.query[fieldName]) {
+          req.query[fieldName] = Number(req.query[fieldName]);
+        }
       });
     }
 
