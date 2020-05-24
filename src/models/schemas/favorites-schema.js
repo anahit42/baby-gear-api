@@ -7,7 +7,10 @@ const FavoritesSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
-  products: [{ type: Schema.Types.ObjectId }],
+  products: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Product',
+  }],
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = FavoritesSchema;

@@ -129,22 +129,22 @@ async function updateProduct(req, res, next) {
     } = req.body;
 
     const updatedFields = {
-        name,
-        description,
-        price,
-        $set: {
-          ...formatUpdateSubDocument(properties, 'properties'),
+      name,
+      description,
+      price,
+      $set: {
+        ...formatUpdateSubDocument(properties, 'properties'),
         ...formatUpdateSubDocument(customProperties, 'customProperties'),
-        },
-        condition,
-        status,
-        quantity,
-        brand,
-        country,
-        issueDate,
-        category,
-      };
+      },
+      condition,
+      status,
+      quantity,
+      brand,
+      country,
+      issueDate,
+      category,
     };
+
     const update = removeObjectUndefinedValue(updatedFields);
 
     const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });
@@ -213,30 +213,23 @@ async function uploadImages(req, res, next) {
   }
 }
 
-async function deleteProduct (req, res, next) {
-
+async function deleteProduct(req, res, next) {
   const { productId } = req.params;
-  const { authorization } = req.headers;
 
   try {
-    const decoded = await JWT.verify(authorization, jwt.secret);
+    const product = await ProductModel.findOne({ _id: productId, userId: req.userData._id });
 
-    const product = await ProductModel.findOne({ _id: productId });
-
-    if (product.userId.toString() !== decoded._id.toString()) {
-      return res.status(401).json({
-        error: 'Not Authorized'
-      });
+    if (product) {
+      throw new NotFoundError('Product is not found');
     }
 
     await ProductModel.deleteOne({ _id: productId });
 
-    return res.status(200).json({
-      'message':'Product removed!'
-    });
+    return res.status(200).json({ message: 'Product removed!' });
   } catch (error) {
     return next(error);
   }
+}
 
 module.exports = {
   createProduct,
