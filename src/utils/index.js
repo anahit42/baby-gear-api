@@ -1,2 +1,1 @@
-module.exports.removeObjectUndefinedValue = require('./removeObjectUndefinedValue');
-module.exports.formatUpdateSubDocument = require('./formatUpdateSubDocument');
+module.exports.CommonUtil = require('./common-util');

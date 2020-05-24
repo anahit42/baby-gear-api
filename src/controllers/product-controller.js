@@ -2,11 +2,10 @@ const config = require('config');
 const FileType = require('file-type');
 const Promise = require('bluebird');
 
+const S3Lib = require('../libs/s3-lib');
 const { ProductModel } = require('../models');
 const { NotFoundError, ForbiddenError } = require('../errors');
-const { removeObjectUndefinedValue, formatUpdateSubDocument } = require('../utils');
-
-const S3Lib = require('../libs/s3-lib');
+const { CommonUtil } = require('../utils');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
@@ -133,8 +132,8 @@ async function updateProduct(req, res, next) {
       description,
       price,
       $set: {
-        ...formatUpdateSubDocument(properties, 'properties'),
-        ...formatUpdateSubDocument(customProperties, 'customProperties'),
+        ...CommonUtil.formatUpdateSubDocument(properties, 'properties'),
+        ...CommonUtil.formatUpdateSubDocument(customProperties, 'customProperties'),
       },
       condition,
       status,
@@ -145,7 +144,7 @@ async function updateProduct(req, res, next) {
       category,
     };
 
-    const update = removeObjectUndefinedValue(updatedFields);
+    const update = CommonUtil.removeObjectUndefinedValue(updatedFields);
 
     const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });
 
@@ -172,7 +171,6 @@ async function uploadImages(req, res, next) {
     const distFileKeys = [];
     const urls = [];
 
-    // Loop each file
     await Promise.map(req.files, async (file) => {
       try {
         const fileType = await FileType.fromBuffer(file.buffer);
@@ -201,7 +199,6 @@ async function uploadImages(req, res, next) {
       }
     });
 
-    // Save image urls in db
     await ProductModel.updateOne({ _id: productId }, { $addToSet: { images: distFileKeys } });
 
     return res.status(200).json({

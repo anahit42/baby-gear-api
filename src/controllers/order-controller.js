@@ -1,5 +1,5 @@
 const { OrderModel } = require('../models');
-const NotfoundError = require('../errors/not-found-error');
+const { NotfoundError } = require('../errors');
 
 async function getOrder(req, res, next) {
   const { orderId } = req.params;

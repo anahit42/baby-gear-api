@@ -1,5 +1,5 @@
 const { FavoritesModel } = require('../models');
-const NotfoundError = require('../errors/not-found-error');
+const { NotfoundError } = require('../errors');
 
 async function deleteFavorite(req, res, next) {
   const { productId } = req.params;

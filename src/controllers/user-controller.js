@@ -1,4 +1,3 @@
-const JWT = require('jsonwebtoken');
 const config = require('config');
 const FileType = require('file-type');
 
@@ -7,7 +6,6 @@ const { ValidationError, ConflictError, ForbiddenError } = require('../errors');
 const CryptoLib = require('../libs/crypto-lib');
 const s3Lib = require('../libs/s3-lib');
 
-const jwt = config.get('jwt');
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
 const getFileType = async (file) => FileType.fromBuffer(file.buffer);
@@ -91,12 +89,9 @@ async function uploadProfilePic(req, res, next) {
   try {
     const { file } = req;
     const { userId } = req.params;
-    const { authorization } = req.headers;
 
-    const decoded = await JWT.verify(authorization, jwt.secret);
-
-    if (userId !== decoded._id.toString()) {
-      return next(new ForbiddenError('Access to the requested resource is forbidden.'));
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('Access to the requested resource is forbidden.');
     }
 
     const fileType = await getFileType(file);
