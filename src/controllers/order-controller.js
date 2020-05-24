@@ -1,5 +1,6 @@
 const { OrderModel } = require('../models');
 const { NotfoundError } = require('../errors');
+const { ResponseHandlerUtil } = require('../utils');
 
 async function getOrder(req, res, next) {
   const { orderId } = req.params;
@@ -11,7 +12,7 @@ async function getOrder(req, res, next) {
       throw new NotfoundError('Item not found');
     }
 
-    return res.status(200).json({ data: order });
+    return ResponseHandlerUtil.handleGet(res, order);
   } catch (error) {
     return next(error);
   }
@@ -22,9 +23,12 @@ async function getOrders(req, res, next) {
   const userId = req.userData._id;
 
   try {
-    const orders = await OrderModel.find({ ownerId: userId }).limit(limit).skip(skip);
+    const [orders, total] = await Promise.all(
+      OrderModel.find({ ownerId: userId }).limit(limit).skip(skip),
+      OrderModel.countDocuments({ ownerId: userId })
+    );
 
-    return res.status(200).json({ data: orders });
+    return ResponseHandlerUtil.handleList(res, orders, total);
   } catch (error) {
     return next(error);
   }

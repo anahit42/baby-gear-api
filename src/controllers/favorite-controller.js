@@ -1,6 +1,8 @@
 const { FavoritesModel } = require('../models');
 const { NotfoundError } = require('../errors');
 
+const { ResponseHandlerUtil } = require('../utils');
+
 async function deleteFavorite(req, res, next) {
   const { productId } = req.params;
   const userId = req.userData._id;
@@ -16,7 +18,7 @@ async function deleteFavorite(req, res, next) {
       throw new NotfoundError('Item not found');
     }
 
-    return res.status(200).json({ data: favoriteData });
+    return ResponseHandlerUtil.handleDelete(res);
   } catch (error) {
     return next(error);
   }
@@ -33,7 +35,7 @@ async function getFavorites(req, res, next) {
       .select({ products: 1, _id: 0 })
       .populate('products');
 
-    return res.status(200).json({ data: favorites });
+    return ResponseHandlerUtil.handleGet(res, favorites);
   } catch (error) {
     return next(error);
   }
@@ -53,7 +55,7 @@ async function addFavoriteProduct(req, res, next) {
       throw new NotfoundError('Not found');
     }
 
-    return res.status(200).json({ data: favoriteData });
+    return ResponseHandlerUtil.handleCreate(res, favoriteData);
   } catch (error) {
     return next(error);
   }

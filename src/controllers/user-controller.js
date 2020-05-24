@@ -1,19 +1,13 @@
 const config = require('config');
-const FileType = require('file-type');
 
+const CryptoLib = require('../libs/crypto-lib');
+const S3Lib = require('../libs/s3-lib');
+const FileManagerLib = require('../libs/file-manager-lib');
 const { UserModel } = require('../models');
 const { ValidationError, ConflictError, ForbiddenError } = require('../errors');
-const CryptoLib = require('../libs/crypto-lib');
-const s3Lib = require('../libs/s3-lib');
+const { CommonUtil, ResponseHandlerUtil } = require('../utils');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
-
-const getFileType = async (file) => FileType.fromBuffer(file.buffer);
-
-function removeUndefinedValues(object) {
-  Object.keys(object).forEach((key) => !object[key] && delete object[key]);
-  return object;
-}
 
 async function getUser(req, res, next) {
   const { userId } = req.params;
@@ -31,7 +25,7 @@ async function getUser(req, res, next) {
     });
 
     if (user.image) {
-      user.image = s3Lib.getSignedUrl({
+      user.image = S3Lib.getSignedUrl({
         bucket: bucketName,
         key: accessKeyId,
         secret: secretAccessKey,
@@ -39,9 +33,7 @@ async function getUser(req, res, next) {
       });
     }
 
-    return res.status(200).json({
-      user,
-    });
+    return ResponseHandlerUtil.handleGet(res, user);
   } catch (error) {
     return next(error);
   }
@@ -67,7 +59,7 @@ async function getUsers(req, res, next) {
 
     users.forEach(users, (user) => {
       if (user.image) {
-        user.image = s3Lib.getSignedUrl({
+        user.image = S3Lib.getSignedUrl({
           bucket: bucketName,
           key: accessKeyId,
           secret: secretAccessKey,
@@ -76,10 +68,7 @@ async function getUsers(req, res, next) {
       }
     });
 
-    return res.status(200).json({
-      data: users,
-      total,
-    });
+    return ResponseHandlerUtil.handleList(res, users, total);
   } catch (error) {
     return next(error);
   }
@@ -94,13 +83,13 @@ async function uploadProfilePic(req, res, next) {
       throw new ForbiddenError('Access to the requested resource is forbidden.');
     }
 
-    const fileType = await getFileType(file);
+    const fileType = await FileManagerLib.getFileType(file);
 
     if (!fileType.mime) {
       throw new ValidationError('Only images allowed');
     }
 
-    const data = await s3Lib.uploadFileToS3({
+    const data = await S3Lib.uploadFileToS3({
       bucket: bucketName,
       key: accessKeyId,
       secret: secretAccessKey,
@@ -113,7 +102,7 @@ async function uploadProfilePic(req, res, next) {
 
     await UserModel.findByIdAndUpdate(userId, { image: fileKey });
 
-    const url = s3Lib.getSignedUrl({
+    const url = S3Lib.getSignedUrl({
       bucket: bucketName,
       key: accessKeyId,
       secret: secretAccessKey,
@@ -121,9 +110,7 @@ async function uploadProfilePic(req, res, next) {
       mimeType: fileType.mime,
     });
 
-    return res.status(200).json({
-      image: url,
-    });
+    return ResponseHandlerUtil.handleUpdate(res, { url });
   } catch (error) {
     return next(error);
   }
@@ -134,7 +121,7 @@ async function updateUser(req, res, next) {
   const { firstName, lastName, email, password } = req.body;
 
   try {
-    const updateFields = removeUndefinedValues({
+    const updateFields = CommonUtil.removeObjectUndefinedValues({
       firstName, lastName, email, password,
     });
 
@@ -156,9 +143,7 @@ async function updateUser(req, res, next) {
 
     await UserModel.updateOne({ _id: userId }, updateFields);
 
-    return res.status(200).json({
-      data: 'User Updated!',
-    });
+    return ResponseHandlerUtil.handleUpdate(res);
   } catch (error) {
     return next(error);
   }

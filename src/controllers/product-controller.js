@@ -5,7 +5,7 @@ const Promise = require('bluebird');
 const S3Lib = require('../libs/s3-lib');
 const { ProductModel } = require('../models');
 const { NotFoundError, ForbiddenError } = require('../errors');
-const { CommonUtil } = require('../utils');
+const { CommonUtil, ResponseHandlerUtil } = require('../utils');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
@@ -58,9 +58,7 @@ async function getProduct(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({
-      data: product,
-    });
+    return ResponseHandlerUtil.handleGet(res, product);
   } catch (error) {
     return next(error);
   }
@@ -74,10 +72,7 @@ async function getProducts(req, res, next) {
       ProductModel.find().limit(limit).skip(skip),
     ]);
 
-    return res.status(200).json({
-      data: products,
-      total,
-    });
+    return ResponseHandlerUtil.handleList(res, products, total);
   } catch (error) {
     return next(error);
   }
@@ -85,23 +80,18 @@ async function getProducts(req, res, next) {
 
 async function getUserProducts(req, res, next) {
   const { userId } = req.params;
-  const { _id } = req.userData;
   const { skip, limit } = req.query;
 
   try {
-    if (userId !== _id.toString()) {
+    if (userId !== req.userData._id) {
       throw new ForbiddenError('You\'re not allowed to view this resource');
     }
 
     const [products, total] = await Promise.all([
       ProductModel.find({ userId }).limit(limit).skip(skip),
-      ProductModel.countDocuments(),
+      ProductModel.countDocuments({ userId }),
     ]);
-
-    return res.status(200).json({
-      data: products,
-      total,
-    });
+    return ResponseHandlerUtil.handleList(res, products, total);
   } catch (error) {
     return next(error);
   }
@@ -144,7 +134,7 @@ async function updateProduct(req, res, next) {
       category,
     };
 
-    const update = CommonUtil.removeObjectUndefinedValue(updatedFields);
+    const update = CommonUtil.removeObjectUndefinedValues(updatedFields);
 
     const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });
 
@@ -152,7 +142,7 @@ async function updateProduct(req, res, next) {
       throw new NotFoundError('Product not found');
     }
 
-    return res.status(200).json({ data: product });
+    return ResponseHandlerUtil.handleUpdate(res, product);
   } catch (error) {
     return next(error);
   }
@@ -201,10 +191,7 @@ async function uploadImages(req, res, next) {
 
     await ProductModel.updateOne({ _id: productId }, { $addToSet: { images: distFileKeys } });
 
-    return res.status(200).json({
-      message: 'Success',
-      imageUrls: urls,
-    });
+    return ResponseHandlerUtil.handleUpdate(res, { urls });
   } catch (error) {
     return next(error);
   }
@@ -222,7 +209,7 @@ async function deleteProduct(req, res, next) {
 
     await ProductModel.deleteOne({ _id: productId });
 
-    return res.status(200).json({ message: 'Product removed!' });
+    return ResponseHandlerUtil.handleDelete(res);
   } catch (error) {
     return next(error);
   }

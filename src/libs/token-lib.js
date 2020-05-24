@@ -25,7 +25,7 @@ async function verifyToken(token) {
   try {
     return await JWT.verify(token, jwtSecret);
   } catch (error) {
-    throw new UnAuthorizedError(HttpStatus.getStatusText(HttpStatus.UNAUTHORIZED));
+    throw new UnAuthorizedError('You are not authorized to perform this action.');
   }
 }
 

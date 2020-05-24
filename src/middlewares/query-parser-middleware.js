@@ -1,7 +1,7 @@
 const fieldNames = ['limit', 'skip'];
 
-class QueryMiddleware {
-  static parseQueryNumbers(req, res, next) {
+class QueryParserMiddleware {
+  static parseNumbers(req, res, next) {
     if (req.query) {
       fieldNames.forEach((fieldName) => {
         if (req.query[fieldName]) {
@@ -14,4 +14,4 @@ class QueryMiddleware {
   }
 }
 
-module.exports = QueryMiddleware;
+module.exports = QueryParserMiddleware;

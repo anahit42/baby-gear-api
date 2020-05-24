@@ -1,6 +1,6 @@
-const HttpStatus = require('http-status-codes');
 const { CategoryModel } = require('../models');
 const { ConflictError, NotFoundError } = require('../errors');
+const { ResponseHandlerUtil } = require('../utils');
 
 function getSlug(name) {
   return name.replace(/\s+/g, '-').toLowerCase();
@@ -36,7 +36,7 @@ async function createCategory(req, res, next) {
 
     const category = await CategoryModel.create(createData);
 
-    return res.status(HttpStatus.OK).json({ data: category });
+    return ResponseHandlerUtil.handleCreate(res, category);
   } catch (error) {
     return next(error);
   }
@@ -51,10 +51,7 @@ async function getCategories(req, res, next) {
       CategoryModel.countDocuments(),
     ]);
 
-    return res.status(200).json({
-      data: categories,
-      total,
-    });
+    return ResponseHandlerUtil.handleList(res, categories, total);
   } catch (error) {
     return next(error);
   }
@@ -69,9 +66,7 @@ async function getCategory(req, res, next) {
       throw new NotFoundError('Category not found.');
     }
 
-    return res.status(HttpStatus.OK).json({
-      data: category,
-    });
+    return ResponseHandlerUtil.handleGet(res, category);
   } catch (error) {
     return next(error);
   }

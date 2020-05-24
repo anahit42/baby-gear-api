@@ -1,10 +1,8 @@
-const HttpStatus = require('http-status-codes');
-
 const CryptoLib = require('../libs/crypto-lib');
 const TokenLib = require('../libs/token-lib');
 
 const { UserModel, FavoritesModel, BucketModel } = require('../models');
-
+const { ResponseHandlerUtil } = require('../utils');
 const { NotFoundError, ConflictError } = require('../errors');
 const { USER_ROLES } = require('../constants');
 
@@ -25,13 +23,7 @@ async function login(req, res, next) {
 
     const token = await TokenLib.createUserToken({ _id: user._id, email, role: user.role });
 
-    return res.status(HttpStatus.OK).json({
-      data: {
-        _id: user._id,
-        email,
-        token,
-      },
-    });
+    return ResponseHandlerUtil.handleSuccess(res, { _id: user._id, email, token });
   } catch (error) {
     return next(error);
   }
@@ -75,7 +67,7 @@ async function register(req, res, next) {
       }),
     ]);
 
-    return res.status(HttpStatus.OK).json({ data: { email } });
+    return ResponseHandlerUtil.handleSuccess(res, { email });
   } catch (error) {
     return next(error);
   }
@@ -115,7 +107,7 @@ async function registerAdmin(req, res, next) {
       isActive: true,
     });
 
-    return res.status(HttpStatus.OK).json({ data: { email } });
+    return ResponseHandlerUtil.handleSuccess(res, { email });
   } catch (error) {
     return next(error);
   }
