@@ -32,7 +32,10 @@ const ProductSchema = new Schema({
   country: String,
   images: [String],
   issueDate: Date,
-  subCategories: [Schema.Types.ObjectId],
+  category: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Category',
+  }],
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = ProductSchema;

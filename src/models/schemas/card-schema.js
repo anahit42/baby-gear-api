@@ -7,6 +7,11 @@ const CardSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
+  stripeToken: {
+    type: String,
+    index: true,
+  },
+  default: Boolean,
 });
 
 module.exports = CardSchema;

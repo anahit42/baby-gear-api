@@ -11,7 +11,7 @@ async function getOrder(req, res, next) {
       throw new NotfoundError('Item not found');
     }
 
-    return res.status(200).json({ result: order });
+    return res.status(200).json({ data: order });
   } catch (error) {
     return next(error);
   }
@@ -24,7 +24,7 @@ async function getOrders(req, res, next) {
   try {
     const orders = await OrderModel.find({ ownerId: userId }).limit(limit).skip(skip);
 
-    return res.status(200).json({ results: orders });
+    return res.status(200).json({ data: orders });
   } catch (error) {
     return next(error);
   }

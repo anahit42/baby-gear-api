@@ -25,7 +25,8 @@ async function createProduct(req, res, next) {
       country,
       issueDate,
       category,
-      } = req.body;
+    } = req.body;
+
     const userId = req.userData._id;
     const product = await ProductModel.create({
       name,
@@ -125,7 +126,7 @@ async function updateProduct(req, res, next) {
       country,
       issueDate,
       category,
-      } = req.body;
+    } = req.body;
 
     const updatedFields = {
         name,
@@ -134,15 +135,16 @@ async function updateProduct(req, res, next) {
         $set: {
           ...formatUpdateSubDocument(properties, 'properties'),
         ...formatUpdateSubDocument(customProperties, 'customProperties'),
-      },
-      condition,
-      status,
-      quantity,
-      brand,
-      country,
-      issueDate,
-      category,
+        },
+        condition,
+        status,
+        quantity,
+        brand,
+        country,
+        issueDate,
+        category,
       };
+    };
     const update = removeObjectUndefinedValue(updatedFields);
 
     const product = await ProductModel.findOneAndUpdate(findQuery, update, { new: true });

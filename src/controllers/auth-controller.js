@@ -3,8 +3,9 @@ const HttpStatus = require('http-status-codes');
 const CryptoLib = require('../libs/crypto-lib');
 const TokenLib = require('../libs/token-lib');
 
+const { UserModel, FavoritesModel, BucketModel } = require('../models');
+
 const { NotFoundError, ConflictError } = require('../errors');
-const { UserModel } = require('../models');
 const { USER_ROLES } = require('../constants');
 
 async function login(req, res, next) {
@@ -55,8 +56,7 @@ async function register(req, res, next) {
     } = req.body;
 
     const passwordHash = await CryptoLib.hashPassword(password);
-
-    await UserModel.create({
+    const createdUser = await UserModel.create({
       firstName,
       lastName,
       email,
@@ -65,6 +65,15 @@ async function register(req, res, next) {
       address,
       isActive: true,
     });
+
+    await Promise.all([
+      FavoritesModel.create({
+        userId: createdUser._id,
+      }),
+      BucketModel.create({
+        userId: createdUser._id,
+      }),
+    ]);
 
     return res.status(HttpStatus.OK).json({ data: { email } });
   } catch (error) {
