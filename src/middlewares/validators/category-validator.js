@@ -1,38 +1,16 @@
-const config = require('config');
-
 const { CategorySchemas } = require('./schemas');
-const { handleErrorDetails } = require('./handlers');
-
-const validationOptions = config.get('validation.options');
+const { ValidationHandlerUtil } = require('../../utils');
 
 function validateCreateCategory(req, res, next) {
-  const { error } = CategorySchemas.createCategorySchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(CategorySchemas.createCategorySchema, req, next);
 }
 
 function validateGetCategories(req, res, next) {
-  const { error } = CategorySchemas.categoryListing.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(CategorySchemas.categoryListing, req, next);
 }
 
 function validateCategoryId(req, res, next) {
-  const { error } = CategorySchemas.categoryIdSchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(CategorySchemas.categoryIdSchema, req, next);
 }
 
 module.exports = {

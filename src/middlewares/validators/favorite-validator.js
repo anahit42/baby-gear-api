@@ -1,36 +1,16 @@
-const config = require('config');
 const { FavoriteSchemas } = require('./schemas');
-const { handleErrorDetails } = require('./handlers');
-
-const validationOptions = config.get('validation.options');
+const { ValidationHandlerUtil } = require('../../utils');
 
 function validateGetFavorite(req, res, next) {
-  const { error } = FavoriteSchemas.favoriteGetSingle.validate(req, validationOptions);
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(FavoriteSchemas.favoriteGetSingle, req, next);
 }
 
 function validateListFavorites(req, res, next) {
-  const { error } = FavoriteSchemas.favoriteList.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(FavoriteSchemas.favoriteList, req, next);
 }
 
 function validateAddFavoriteProduct(req, res, next) {
-  const { error } = FavoriteSchemas.addFavoriteProductSchemas.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(FavoriteSchemas.addFavoriteProductSchemas, req, next);
 }
 
 module.exports = {

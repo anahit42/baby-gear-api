@@ -1,58 +1,24 @@
-const config = require('config');
-
 const { UserSchemas } = require('./schemas');
-const { handleErrorDetails } = require('./handlers');
-
-const validationOptions = config.get('validation.options');
+const { ValidationHandlerUtil } = require('../../utils');
 
 function validateRegisterUser(req, res, next) {
-  const { error } = UserSchemas.registerUserSchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(UserSchemas.registerUserSchema, req, next);
 }
 
 function validateLoginUser(req, res, next) {
-  const { error } = UserSchemas.loginUserSchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(UserSchemas.loginUserSchema, req, next);
 }
 
 function validateUserId(req, res, next) {
-  const { error } = UserSchemas.userIdSchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(UserSchemas.userIdSchema, req, next);
 }
 
 function validateUpdateUser(req, res, next) {
-  const { error } = UserSchemas.updateUserSchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(UserSchemas.updateUserSchema, req, next);
 }
 
 function validateLimitSkip(req, res, next) {
-  const { error } = UserSchemas.limitSkipSchema.validate(req, validationOptions);
-
-  if (error) {
-    return handleErrorDetails(error, next);
-  }
-
-  return next();
+  return ValidationHandlerUtil.validate(UserSchemas.limitSkipSchema, req, next);
 }
 
 module.exports = {
