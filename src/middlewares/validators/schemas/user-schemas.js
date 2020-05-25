@@ -37,7 +37,7 @@ const updateUserSchema = Joi.object({
     firstName: Joi.string().trim().max(100),
     lastName: Joi.string().trim().max(100),
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{5,30}$')),
-    mobilePhone: JoiStringExtension.string().phoneNumber().required(),
+    mobilePhone: JoiStringExtension.string().phoneNumber(),
     email: Joi.string().trim().email(),
     address: addressSchema,
   }),
