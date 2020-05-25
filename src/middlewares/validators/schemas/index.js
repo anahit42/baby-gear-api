@@ -1,3 +1,4 @@
+module.exports.CardSchemas = require('./card-schemas');
 module.exports.CategorySchemas = require('./category-schemas');
 module.exports.FavoriteSchemas = require('./favorite-schemas');
 module.exports.OrderSchemas = require('./order-schemas');

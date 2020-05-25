@@ -8,6 +8,8 @@ class ErrorHandlerMiddleware {
 
   // eslint-disable-next-line no-unused-vars
   static handleError(error, req, res, next) {
+    // eslint-disable-next-line no-console
+    console.log('Error', error.message);
     if (error.customError) {
       return ResponseHandlerUtil.handleError(res, {
         status: error.status,

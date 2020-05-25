@@ -22,10 +22,11 @@
       "allowUnknown": true,
       "convert": true
     },
-    "product":{
-      "status":["active", "deleted", "not-available"],
-      "condition":["new", "very good","good", "acceptable"]
-    }
+    "product": {
+      "status": ["active", "deleted", "not-available"],
+      "condition": ["new", "very good","good", "acceptable"]
+    },
+    "cardTypes": ["au_becs_debit", "card", "fpx", "ideal", "sepa_debit"]
   },
   "image": {
     "validMimes": [ "image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp" ]

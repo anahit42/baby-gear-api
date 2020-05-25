@@ -40,7 +40,7 @@ async function createCard(req, res, next) {
     });
     const cardDoc = await CardModel.create({ userId, cardId: card.id });
 
-    return ResponseHandlerUtil.handleCreate(res, { number, user, card: cardDoc });
+    return ResponseHandlerUtil.handleCreate(res, { card: cardDoc });
   } catch (error) {
     return next(error);
   }
