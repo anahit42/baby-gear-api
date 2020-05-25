@@ -7,7 +7,7 @@ const CardSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
-  stripeToken: {
+  cardId: {
     type: String,
     index: true,
   },

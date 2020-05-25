@@ -118,11 +118,16 @@ async function uploadProfilePic(req, res, next) {
 
 async function updateUser(req, res, next) {
   const { userId } = req.params;
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, mobilePhone, address } = req.body;
 
   try {
     const updateFields = CommonUtil.removeObjectUndefinedValues({
-      firstName, lastName, email, password,
+      firstName,
+      lastName,
+      email,
+      password,
+      mobilePhone,
+      address,
     });
 
     if (password) {
