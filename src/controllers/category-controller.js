@@ -91,7 +91,8 @@ async function uploadCategoryImage(req, res, next) {
     }
 
     const _id = categoryId;
-    const url = await uploadAndUpdateModelItem({ file, fileType, _id }, CategoryModel);
+    const updateField = 'image';
+    const url = await uploadAndUpdateModelItem({ file, fileType, _id, updateField }, CategoryModel);
 
     return ResponseHandlerUtil.handleUpdate(res, { url });
   } catch (error) {

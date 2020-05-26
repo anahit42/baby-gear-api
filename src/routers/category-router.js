@@ -5,7 +5,8 @@ const router = express.Router();
 const { uploadImage } = require('../libs/multer-lib');
 const AuthMiddleware = require('../middlewares/auth-middleware');
 
-const { createCategory,
+const {
+  createCategory,
   getCategory,
   getCategories,
   uploadCategoryImage } = require('../controllers/category-controller');
