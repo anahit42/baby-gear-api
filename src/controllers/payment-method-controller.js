@@ -1,11 +1,11 @@
-const { CardModel, UserModel } = require('../models');
+const { PaymentMethodModel, UserModel } = require('../models');
 const { ResponseHandlerUtil } = require('../utils');
 
 const StripeLib = require('../libs/stripe-lib');
 
-async function createCard(req, res, next) {
+async function createPaymentMethod(req, res, next) {
   try {
-    const { cvc, defaultCard, number, expMonth, expYear, type } = req.body;
+    const { card, type, defaultMethod } = req.body;
     const userId = req.userData._id;
 
     const user = await UserModel.findOne({ _id: userId });
@@ -23,13 +23,10 @@ async function createCard(req, res, next) {
 
     const customerId = user.paymentCustomerId;
 
-    const card = await StripeLib.creteCard({
-      card: {
-        number,
-        cvc,
-        exp_month: expMonth,
-        exp_year: expYear,
-      },
+    const paymentMethod = await StripeLib.createPaymentMethod({
+      card,
+      type,
+      customerId,
       billingDetails: {
         address: {
           line1: user.address.street,
@@ -38,23 +35,22 @@ async function createCard(req, res, next) {
           postal_code: user.address.zipCode,
         },
       },
-      type,
-      customerId,
     });
-    const cardId = card.id;
 
-    if (defaultCard) {
-      await StripeLib.setCardAsDefault({ cardId, customerId });
+    const methodId = paymentMethod.id;
+
+    if (defaultMethod) {
+      await StripeLib.setPaymentMethodAsDefault({ methodId, customerId });
     }
 
-    const cardDoc = await CardModel.create({ userId, cardId });
+    const paymentMethodDoc = await PaymentMethodModel.create({ userId, methodId, methodType: type });
 
-    return ResponseHandlerUtil.handleCreate(res, { card: cardDoc });
+    return ResponseHandlerUtil.handleCreate(res, { paymentMethod: paymentMethodDoc });
   } catch (error) {
     return next(error);
   }
 }
 
 module.exports = {
-  createCard,
+  createPaymentMethod,
 };

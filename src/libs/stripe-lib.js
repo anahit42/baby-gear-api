@@ -32,7 +32,7 @@ class StripeLib {
    * @param { string } payload.type
    * @param { string } payload.customerId
    */
-  async creteCard(payload) {
+  async createPaymentMethod(payload) {
     try {
       const { card, billingDetails, type, customerId } = payload;
       const createdCard = await this.stripe.paymentMethods.create({
@@ -52,13 +52,13 @@ class StripeLib {
   /**
    * @param { Object } payload
    * @param { string } payload.customerId
-   * @param { string } payload.cardId
+   * @param { string } payload.methodId
    */
-  async setCardAsDefault(payload) {
+  async setPaymentMethodAsDefault(payload) {
     try {
-      const { customerId, cardId } = payload;
+      const { customerId, methodId } = payload;
       const updateData = {
-        invoice_settings: { default_payment_method: cardId },
+        invoice_settings: { default_payment_method: methodId },
       };
 
       return await this.stripe.customers.update(customerId, updateData);
