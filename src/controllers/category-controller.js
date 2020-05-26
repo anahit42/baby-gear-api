@@ -1,6 +1,8 @@
 const { CategoryModel } = require('../models');
 const { ConflictError, NotFoundError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
+const { uploadAndUpdateModelItem } = require('../libs/upload-lib');
+const FileManagerLib = require('../libs/file-manager-lib');
 
 function getSlug(name) {
   return name.replace(/\s+/g, '-').toLowerCase();
@@ -28,7 +30,7 @@ async function createCategory(req, res, next) {
       const parent = await CategoryModel.findById(parentId);
 
       if (!parent) {
-        throw new NotFoundError(`The parent with id = ${parentId} not found`);
+        throw new NotFoundError(`The parent with id = ${parentId} not found.`);
       }
 
       createData.ancestors = [...parent.ancestors, parentId];
@@ -72,8 +74,34 @@ async function getCategory(req, res, next) {
   }
 }
 
+async function uploadCategoryImage(req, res, next) {
+  try {
+    const { file } = req;
+    const { categoryId } = req.params;
+
+    const categoryExists = await CategoryModel.exists({ _id: categoryId });
+    if (!categoryExists) {
+      throw new NotFoundError(`Category with id = ${categoryId} not found.`);
+    }
+
+    const fileType = await FileManagerLib.getFileType(file);
+
+    if (!fileType.mime) {
+      throw new ValidationError('Only images allowed');
+    }
+
+    const _id = categoryId;
+    const url = await uploadAndUpdateModelItem({ file, fileType, _id }, CategoryModel);
+
+    return ResponseHandlerUtil.handleUpdate(res, { url });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getCategory,
   createCategory,
   getCategories,
+  uploadCategoryImage
 };
