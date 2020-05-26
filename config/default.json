@@ -26,7 +26,7 @@
       "status": ["active", "deleted", "not-available"],
       "condition": ["new", "very good","good", "acceptable"]
     },
-    "paymentTypes": ["au_becs_debit", "card", "fpx", "ideal", "sepa_debit"]
+    "paymentTypes": ["card"]
   },
   "image": {
     "validMimes": [ "image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp" ]
