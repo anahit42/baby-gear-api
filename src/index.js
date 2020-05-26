@@ -17,7 +17,13 @@ const apiPort = config.get('api.port');
 const app = express();
 
 const {
-  authRouter, categoryRouter, favoriteRouter, orderRouter, productRouter, userRouter,
+  authRouter,
+  categoryRouter,
+  favoriteRouter,
+  orderRouter,
+  paymentMethodRouter,
+  productRouter,
+  userRouter,
 } = require('./routers');
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,6 +39,7 @@ app.use(AuthMiddleware.authorize);
 app.use('/favorites', favoriteRouter);
 app.use('/orders', orderRouter);
 app.use('/users', userRouter);
+app.use('/payment-methods', paymentMethodRouter);
 
 app.use(ErrorHandlerMiddleware.handlePathNotFound);
 app.use(ErrorHandlerMiddleware.handleError);

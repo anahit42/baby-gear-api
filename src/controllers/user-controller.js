@@ -17,12 +17,7 @@ async function getUser(req, res, next) {
       throw new ForbiddenError('Not Authorized!');
     }
 
-    const user = await UserModel.findOne({ _id: userId }).select({
-      password: 0,
-      email: 0,
-      mobilePhone: 0,
-      address: 0,
-    });
+    const user = await UserModel.findOne({ _id: userId }).select('firstName lastName email mobilePhone address');
 
     if (user.image) {
       user.image = S3Lib.getSignedUrl({
@@ -48,12 +43,7 @@ async function getUsers(req, res, next) {
     }
 
     const [users, total] = await Promise.all([
-      UserModel.find({}).select({
-        password: 0,
-        email: 0,
-        mobilePhone: 0,
-        address: 0,
-      }).limit(limit).skip(skip),
+      UserModel.find({}).select('firstName lastName email mobilePhone address').limit(limit).skip(skip),
       UserModel.countDocuments({}),
     ]);
 
@@ -118,11 +108,16 @@ async function uploadProfilePic(req, res, next) {
 
 async function updateUser(req, res, next) {
   const { userId } = req.params;
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, mobilePhone, address } = req.body;
 
   try {
     const updateFields = CommonUtil.removeObjectUndefinedValues({
-      firstName, lastName, email, password,
+      firstName,
+      lastName,
+      email,
+      password,
+      mobilePhone,
+      address,
     });
 
     if (password) {

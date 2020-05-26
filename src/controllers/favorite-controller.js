@@ -32,7 +32,6 @@ async function getFavorites(req, res, next) {
     const favorites = await FavoritesModel.findOne({ userId })
       .limit(limit)
       .skip(skip)
-      .select({ products: 1, _id: 0 })
       .populate('products');
 
     return ResponseHandlerUtil.handleGet(res, favorites);

@@ -2,16 +2,17 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const CardSchema = new Schema({
+const PaymentMethodSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
-  stripeToken: {
+  methodId: {
     type: String,
     index: true,
   },
+  methodType: String,
   default: Boolean,
 });
 
-module.exports = CardSchema;
+module.exports = PaymentMethodSchema;

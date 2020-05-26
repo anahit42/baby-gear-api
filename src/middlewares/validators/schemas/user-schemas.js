@@ -1,21 +1,21 @@
 const Joi = require('@hapi/joi');
+const JoiStringExtension = require('../extensions/joi-string-extension');
 
 const addressSchema = Joi.object({
   zipCode: Joi.string().trim().max(100).required(),
   street: Joi.string().trim().max(100).required(),
-  country: Joi.string().trim().max(100).required(),
+  country: JoiStringExtension.string().countryCode().required(),
   city: Joi.string().trim().max(100).required(),
 });
 
 const registerUserSchema = Joi.object({
   body: Joi.object({
     firstName: Joi.string().trim().max(100).required(),
-    lastName: Joi.string().trim().max(100).trim()
-      .required(),
+    lastName: Joi.string().trim().max(100).required(),
     email: Joi.string().trim().email().required(),
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{5,30}$')).required(),
-    mobilePhone: Joi.string().pattern(new RegExp('^0\\d{2}-\\d{2}-\\d{2}-\\d{2}$')),
-    address: addressSchema,
+    mobilePhone: JoiStringExtension.string().phoneNumber().required(),
+    address: addressSchema.required(),
   }),
 });
 
@@ -37,7 +37,9 @@ const updateUserSchema = Joi.object({
     firstName: Joi.string().trim().max(100),
     lastName: Joi.string().trim().max(100),
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{5,30}$')),
+    mobilePhone: JoiStringExtension.string().phoneNumber(),
     email: Joi.string().trim().email(),
+    address: addressSchema,
   }),
   params: Joi.object({
     userId: Joi.string().hex().length(24).required(),

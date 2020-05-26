@@ -28,6 +28,7 @@ const UserSchema = new Schema({
     city: String,
   },
   isActive: Boolean,
+  paymentCustomerId: String,
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = UserSchema;

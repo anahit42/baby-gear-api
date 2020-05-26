@@ -22,10 +22,11 @@
       "allowUnknown": true,
       "convert": true
     },
-    "product":{
-      "status":["active", "deleted", "not-available"],
-      "condition":["new", "very good","good", "acceptable"]
-    }
+    "product": {
+      "status": ["active", "deleted", "not-available"],
+      "condition": ["new", "very good","good", "acceptable"]
+    },
+    "paymentTypes": ["card"]
   },
   "image": {
     "validMimes": [ "image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp" ]
