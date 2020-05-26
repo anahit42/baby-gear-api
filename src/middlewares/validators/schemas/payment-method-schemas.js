@@ -14,7 +14,7 @@ const createPaymentMethodSchema = Joi.object({
   body: Joi.object({
     type: Joi.string().valid(...paymentTypes).required(),
     card: cardSchema.when('type', { is: 'card', then: Joi.object().required() }),
-    defaultMethod: Joi.boolean(),
+    defaultMethod: Joi.boolean().required(),
   }),
 });
 
