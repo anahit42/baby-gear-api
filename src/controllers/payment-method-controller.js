@@ -43,7 +43,12 @@ async function createPaymentMethod(req, res, next) {
       await StripeLib.setPaymentMethodAsDefault({ methodId, customerId });
     }
 
-    const paymentMethodDoc = await PaymentMethodModel.create({ userId, methodId, methodType: type });
+    const paymentMethodDoc = await PaymentMethodModel.create({
+      userId,
+      methodId,
+      methodType: type,
+      default: defaultMethod,
+    });
 
     return ResponseHandlerUtil.handleCreate(res, { paymentMethod: paymentMethodDoc });
   } catch (error) {
