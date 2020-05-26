@@ -1,8 +1,7 @@
 const config = require('config');
-const S3Lib = require('../libs/s3-lib');
+const S3Lib = require('./s3-lib');
 
 async function uploadAndUpdateModelItem(playload, ItemModel) {
-
   const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
   const { file, fileType, _id } = playload;
 
@@ -16,7 +15,7 @@ async function uploadAndUpdateModelItem(playload, ItemModel) {
   });
 
   const fileKey = data.Key || data.key;
-  let doc = await ItemModel.findByIdAndUpdate(_id, { image: fileKey });
+  await ItemModel.findByIdAndUpdate(_id, { image: fileKey });
 
   return S3Lib.getSignedUrl({
     bucket: bucketName,

@@ -1,5 +1,5 @@
 const { CategoryModel } = require('../models');
-const { ConflictError, NotFoundError } = require('../errors');
+const { ConflictError, NotFoundError, ValidationError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
 const { uploadAndUpdateModelItem } = require('../libs/upload-lib');
 const FileManagerLib = require('../libs/file-manager-lib');
@@ -103,5 +103,5 @@ module.exports = {
   getCategory,
   createCategory,
   getCategories,
-  uploadCategoryImage
+  uploadCategoryImage,
 };
