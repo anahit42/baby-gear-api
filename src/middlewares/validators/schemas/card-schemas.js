@@ -9,6 +9,7 @@ const createCardSchema = Joi.object({
     expMonth: Joi.number().required(),
     expYear: Joi.number().required(),
     cvc: Joi.string().required(),
+    defaultCard: Joi.boolean(),
     type: Joi.string().valid(...cardTypes).required(),
   }),
 });

@@ -5,7 +5,7 @@ const StripeLib = require('../libs/stripe-lib');
 
 async function createCard(req, res, next) {
   try {
-    const { cvc, number, expMonth, expYear, type } = req.body;
+    const { cvc, defaultCard, number, expMonth, expYear, type } = req.body;
     const userId = req.userData._id;
 
     const user = await UserModel.findOne({ _id: userId });
@@ -20,6 +20,8 @@ async function createCard(req, res, next) {
       user.paymentCustomerId = customer.id;
       await user.save();
     }
+
+    const customerId = user.paymentCustomerId;
 
     const card = await StripeLib.creteCard({
       card: {
@@ -37,8 +39,15 @@ async function createCard(req, res, next) {
         },
       },
       type,
+      customerId,
     });
-    const cardDoc = await CardModel.create({ userId, cardId: card.id });
+    const cardId = card.id;
+
+    if (defaultCard) {
+      await StripeLib.setCardAsDefault({ cardId, customerId });
+    }
+
+    const cardDoc = await CardModel.create({ userId, cardId });
 
     return ResponseHandlerUtil.handleCreate(res, { card: cardDoc });
   } catch (error) {
