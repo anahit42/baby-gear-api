@@ -66,6 +66,55 @@ class StripeLib {
       throw new PaymentError(error.message, error.statusCode);
     }
   }
+
+  /**
+   * @param { Object } payload
+   * @param { string } payload.customerId
+   * @param { string } payload.currency
+   * @param { number } payload.amount
+   * @param { string } payload.description
+   * @param { Object } [payload.metadata]
+   */
+  async createInvoiceItem(payload) {
+    try {
+      const { customerId, currency, amount, description, metadata } = payload;
+      return await this.stripe.invoiceItems.create({
+        customer: customerId,
+        currency,
+        amount: amount * 100,
+        description,
+        metadata,
+      });
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
+
+  /**
+   * @param { Object } payload
+   * @param { string } payload.customerId
+   * @param { string } payload.description
+   * @param { Object } [payload.metadata]
+   */
+  async createInvoice(payload) {
+    try {
+      const { customerId, description, metadata } = payload;
+      const invoice = await this.stripe.invoices.create({
+        customer: customerId,
+        collection_method: 'charge_automatically',
+        auto_advance: true,
+        description,
+        metadata,
+      });
+
+      await this.stripe.invoices.finalizeInvoice(invoice.id);
+      await this.stripe.invoices.pay(invoice.id);
+
+      return invoice;
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
 }
 
 module.exports = new StripeLib();
