@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 
 const config = require('config');
+const { PaymentError } = require('../errors');
 
 const secretKey = config.get('stripe.secretKey');
 
@@ -16,8 +17,12 @@ class StripeLib {
    * @param { string } payload.phone
    */
   async createCustomer(payload) {
-    const { email, name, phone } = payload;
-    return this.stripe.customers.create({ email, name, phone });
+    try {
+      const { email, name, phone } = payload;
+      return await this.stripe.customers.create({ email, name, phone });
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
   }
 
   /**
@@ -28,16 +33,20 @@ class StripeLib {
    * @param { string } payload.customerId
    */
   async creteCard(payload) {
-    const { card, billingDetails, type, customerId } = payload;
-    const createdCard = await this.stripe.paymentMethods.create({
-      card,
-      type,
-      billing_details: billingDetails,
-    });
+    try {
+      const { card, billingDetails, type, customerId } = payload;
+      const createdCard = await this.stripe.paymentMethods.create({
+        card,
+        type,
+        billing_details: billingDetails,
+      });
 
-    await this.stripe.paymentMethods.attach(createdCard.id, { customer: customerId });
+      await this.stripe.paymentMethods.attach(createdCard.id, { customer: customerId });
 
-    return createdCard;
+      return createdCard;
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
   }
 
   /**
@@ -46,12 +55,16 @@ class StripeLib {
    * @param { string } payload.cardId
    */
   async setCardAsDefault(payload) {
-    const { customerId, cardId } = payload;
-    const updateData = {
-      invoice_settings: { default_payment_method: cardId },
-    };
+    try {
+      const { customerId, cardId } = payload;
+      const updateData = {
+        invoice_settings: { default_payment_method: cardId },
+      };
 
-    return this.stripe.customers.update(customerId, updateData);
+      return await this.stripe.customers.update(customerId, updateData);
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
   }
 }
 
