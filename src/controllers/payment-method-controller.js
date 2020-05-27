@@ -56,6 +56,19 @@ async function createPaymentMethod(req, res, next) {
   }
 }
 
+async function updateUserPaymentMethod(req, res, next) {
+  try {
+    const userId = req.userData._id;
+
+    const user = await UserModel.findOne({ _id: userId });
+    await PaymentMethodModel.findOneAndUpdate({ default: true, userId }, { default: false });
+    await StripeLib.setPaymentMethodAsDefault({ methodId: null, customerId: user.paymentCustomerId });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   createPaymentMethod,
+  updateUserPaymentMethod,
 };
