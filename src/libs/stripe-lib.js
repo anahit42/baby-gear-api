@@ -51,6 +51,26 @@ class StripeLib {
 
   /**
    * @param { Object } payload
+   * @param { Object } payload.card
+   * @param { Object } payload.billingDetails
+   * @param { string } payload.type
+   * @param { string } payload.customerId
+   */
+  async updatePaymentMethod(payload) {
+    try {
+      const { billingDetails } = payload;
+      const createdCard = await this.stripe.paymentMethods.update({
+        billing_details: billingDetails,
+      });
+
+      return createdCard;
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
+
+  /**
+   * @param { Object } payload
    * @param { string } payload.customerId
    * @param { string } payload.methodId
    */

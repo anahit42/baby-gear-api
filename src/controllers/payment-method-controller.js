@@ -1,11 +1,13 @@
 const { PaymentMethodModel, UserModel } = require('../models');
 const { ResponseHandlerUtil } = require('../utils');
+const { NotFoundError } = require('../errors/not-found-error');
+const { MethodNotAllowedError } = require('../errors/method-not-allowed');
 
 const StripeLib = require('../libs/stripe-lib');
 
 async function createPaymentMethod(req, res, next) {
   try {
-    const { card, type, defaultMethod } = req.body;
+    const { card, type, isDefaultMethod, shippingDetails } = req.body;
     const userId = req.userData._id;
 
     const user = await UserModel.findOne({ _id: userId });
@@ -15,6 +17,8 @@ async function createPaymentMethod(req, res, next) {
         email: user.email,
         name: `${user.firstName} ${user.lastName}`,
         phone: user.mobilePhone,
+        tax_exempt: 'exempt',
+        shipping: shippingDetails,
       });
 
       user.paymentCustomerId = customer.id;
@@ -34,12 +38,15 @@ async function createPaymentMethod(req, res, next) {
           country: user.address.country,
           postal_code: user.address.zipCode,
         },
+        name: `${user.firstName} ${user.lastName}`,
+        phone: user.mobilePhone,
+        email: user.email,
       },
     });
 
     const methodId = paymentMethod.id;
 
-    if (defaultMethod) {
+    if (isDefaultMethod) {
       await StripeLib.setPaymentMethodAsDefault({ methodId, customerId });
     }
 
@@ -47,7 +54,7 @@ async function createPaymentMethod(req, res, next) {
       userId,
       methodId,
       methodType: type,
-      default: defaultMethod,
+      isDefault: isDefaultMethod,
     });
 
     return ResponseHandlerUtil.handleCreate(res, { paymentMethod: paymentMethodDoc });
@@ -58,13 +65,34 @@ async function createPaymentMethod(req, res, next) {
 
 async function updateUserPaymentMethod(req, res, next) {
   try {
+    const { isDefaultMethod, billingDetails } = req.body;
+    const { methodId } = req.params;
     const userId = req.userData._id;
 
-    const user = await UserModel.findOne({ _id: userId });
-    await PaymentMethodModel.findOneAndUpdate({ default: true, userId }, { default: false });
-    await StripeLib.setPaymentMethodAsDefault({ methodId: null, customerId: user.paymentCustomerId });
+    const { isDefault } = await PaymentMethodModel.findOne({ userId, methodId });
+
+    if (!isDefault) {
+      throw NotFoundError(`The payment method with id = ${methodId} not found.`);
+    }
+
+    if (!isDefaultMethod || isDefault) {
+      throw new MethodNotAllowedError('You can set to default only not default method.');
+    }
+
+    const inDbPaymentMethod = await PaymentMethodModel.findOneAndUpdate({
+      userId,
+      methodId }, { isDefault, billingDetails });
+
+    await PaymentMethodModel.findOneAndUpdate({ userId, isDefault: isDefaultMethod }, { isDefault: false });
+
+    await StripeLib.updatePaymentMethod({ billingDetails });
+
+    const { paymentCustomerId } = await UserModel.findOne({ _id: userId });
+    await StripeLib.setPaymentMethodAsDefault({ methodId, customerId: paymentCustomerId });
+
+    return ResponseHandlerUtil.handleCreate(res, { paymentMethod: inDbPaymentMethod });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 
