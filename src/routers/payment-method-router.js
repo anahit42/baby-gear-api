@@ -3,10 +3,11 @@ const express = require('express');
 const router = express.Router();
 
 const { validateCreatePaymentMethod,
-  validateUpdatePaymentMethod } = require('../middlewares/validators/payment-method-validator');
+  validateUpdatePaymentMethod,
+  validateMethodId } = require('../middlewares/validators/payment-method-validator');
 const { createPaymentMethod, updateUserPaymentMethod } = require('../controllers/payment-method-controller');
 
 router.post('/', validateCreatePaymentMethod, createPaymentMethod);
-router.post('/', validateUpdatePaymentMethod, updateUserPaymentMethod);
+router.post('/:methodId', validateMethodId, validateUpdatePaymentMethod, updateUserPaymentMethod);
 
 module.exports = router;
