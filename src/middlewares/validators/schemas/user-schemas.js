@@ -4,7 +4,7 @@ const JoiStringExtension = require('../extensions/joi-string-extension');
 const addressSchema = Joi.object({
   zipCode: Joi.string().trim().max(100).required(),
   street: Joi.string().trim().max(100).required(),
-  country: JoiStringExtension.string().countryCode().required(),
+  country: JoiStringExtension.string().countryCode().length(2).required(),
   city: Joi.string().trim().max(100).required(),
 });
 
