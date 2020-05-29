@@ -124,9 +124,7 @@ class StripeLib {
     try {
       const { methodId } = payload;
 
-      const paymentMethod = await this.stripe.paymentMethods.detach(methodId);
-
-      return paymentMethod;
+      return await this.stripe.paymentMethods.detach(methodId);
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }
