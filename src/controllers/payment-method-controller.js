@@ -113,7 +113,26 @@ async function updateUserPaymentMethod(req, res, next) {
   }
 }
 
+async function deletePaymentMethod(req, res, next) {
+  const { paymentMethodId } = req.params;
+
+  try {
+    await StripeLib.deletePaymentMethod({ methodId: paymentMethodId });
+
+    const method = await PaymentMethodModel.findOneAndDelete({ methodId: paymentMethodId });
+
+    if (!method) {
+      throw new NotFoundError('The payment method is not found');
+    }
+
+    return ResponseHandlerUtil.handleDelete(res, method);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createPaymentMethod,
   updateUserPaymentMethod,
+  deletePaymentMethod,
 };

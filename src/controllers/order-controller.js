@@ -1,6 +1,10 @@
-const { OrderModel } = require('../models');
-const { NotfoundError } = require('../errors');
+const Promise = require('bluebird');
+
+const { OrderModel, UserModel } = require('../models');
+const { NotFoundError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
+
+const OrderLib = require('../libs/order-lib');
 
 async function getOrder(req, res, next) {
   const { orderId } = req.params;
@@ -9,7 +13,7 @@ async function getOrder(req, res, next) {
     const order = await OrderModel.findOne({ _id: orderId });
 
     if (!order) {
-      throw new NotfoundError('Item not found');
+      throw new NotFoundError('Item not found');
     }
 
     return ResponseHandlerUtil.handleGet(res, order);
@@ -34,7 +38,34 @@ async function getOrders(req, res, next) {
   }
 }
 
+async function createOrder(req, res, next) {
+  const { products, paymentMethodId } = req.body;
+  const userId = req.userData._id;
+
+  try {
+    const user = await UserModel.findOne({ _id: userId }).select('paymentCustomerId');
+    const { paymentCustomerId } = user;
+
+    await OrderLib.createOrdersAndInvoiceItems({
+      products,
+      userId,
+      paymentCustomerId,
+    });
+
+    const invoice = await OrderLib.createInvoice({
+      paymentMethodId,
+      paymentCustomerId,
+      userId,
+    });
+
+    return ResponseHandlerUtil.handleCreate(res, invoice);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getOrder,
   getOrders,
+  createOrder,
 };

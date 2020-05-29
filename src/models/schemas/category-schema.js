@@ -12,6 +12,7 @@ const CategorySchema = new Schema({
   name: String,
   parentId: Schema.Types.ObjectId,
   description: String,
+  image: String,
   ancestors: [{
     type: Schema.Types.ObjectId,
     ref: 'Category',
