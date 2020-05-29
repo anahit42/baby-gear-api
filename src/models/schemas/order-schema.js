@@ -27,6 +27,7 @@ const OrderSchema = new Schema({
   status: {
     type: String,
     enum: ['paid', 'pending', 'failed', 'expired'],
+    default: 'pending',
   },
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 

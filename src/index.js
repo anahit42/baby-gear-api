@@ -10,6 +10,11 @@ const mongodb = require('./storages/mongodb');
 
 mongodb.init();
 
+const cronJobs = require('./jobs');
+
+// eslint-disable-next-line no-console
+cronJobs.start().catch(console.error);
+
 const { AuthMiddleware, QueryParserMiddleware, ErrorHandlerMiddleware } = require('./middlewares');
 
 const apiPort = config.get('api.port');

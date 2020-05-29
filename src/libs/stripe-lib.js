@@ -138,10 +138,14 @@ class StripeLib {
     }
   }
 
-  /**
-   * @param { Object } payload
-   * @param { string } payload.methodId
-   */
+  async getInvoiceById(invoiceId) {
+    try {
+      return await this.stripe.invoices.retrieve(invoiceId);
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
+
   async deletePaymentMethod(payload) {
     try {
       const { methodId } = payload;

@@ -19,12 +19,12 @@ const InvoiceSchema = new Schema({
     amount: Number,
   }],
   totalPrice: Number,
+  paid: Boolean,
   status: {
     type: String,
     enum: ['draft', 'open', 'paid', 'uncollectible', 'void'],
     default: 'open',
   },
-  paid: Boolean,
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 
 module.exports = InvoiceSchema;
