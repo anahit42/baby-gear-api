@@ -12,9 +12,6 @@ const OrderSchema = new Schema({
     ref: 'Product',
   },
   quantity: Number,
-  transactionId: {
-    type: Schema.Types.ObjectId,
-  },
   deliveryStatus: {
     type: String,
     enum: ['pending', 'shipped', 'delivered'],
@@ -30,6 +27,7 @@ const OrderSchema = new Schema({
   status: {
     type: String,
     enum: ['paid', 'pending', 'failed', 'expired'],
+    default: 'pending',
   },
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
 

@@ -117,17 +117,11 @@ class StripeLib {
   }
 
   /**
-   * @param { Object } payload
-   * @param { number } payload.limit
-   * @param { string } payload.startingAfter
+   * @param { string } invoiceId
    */
-  async getInvoices(payload) {
+  async getInvoiceById(invoiceId) {
     try {
-      const { limit, startingAfter } = payload;
-      return await this.stripe.invoices.list({
-        limit,
-        starting_after: startingAfter,
-      });
+      return await this.stripe.invoices.retrieve(invoiceId);
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }
