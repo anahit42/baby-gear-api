@@ -1,27 +1,26 @@
 const { PaymentMethodModel } = require('../models');
-const { NotFoundError } = require('../errors');
+const { NotFoundError, PaymentError } = require('../errors');
 
-async function getUserPaymentMethod(req) {
-    try {
-        const { paymentMethodId } = req.body;
-        const userId = req.userData._id;
+async function getUserPaymentMethod(payload) {
+  try {
+    const { paymentMethodId, userId } = payload;
 
-        if (paymentMethodId) {
-            const paymentMethod = await PaymentMethodModel.findOne({ _id: paymentMethodId });
-            return paymentMethod;
-        }
-        
-
-        const paymentMethod = await PaymentMethodModel.findOne({ userId }).where({ default: 'true' });
-        if (!paymentMethod) {
-            throw new NotFoundError('Default payment method not found, please provide payment method');
-        }
-        return paymentMethod;
-    } catch (error) {
-        throw new Error();
+    if (paymentMethodId) {
+      return await PaymentMethodModel.findOne({ _id: paymentMethodId, userId });
     }
+
+    const paymentMethod = await PaymentMethodModel.findOne({ userId, default: true });
+
+    if (!paymentMethod) {
+      throw new NotFoundError('Default payment method not found, please provide payment method');
+    }
+
+    return paymentMethod;
+  } catch (error) {
+    throw new PaymentError(error.message);
+  }
 }
 
 module.exports = {
-    getUserPaymentMethod,
+  getUserPaymentMethod,
 };
