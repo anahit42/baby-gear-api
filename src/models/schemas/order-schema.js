@@ -12,9 +12,6 @@ const OrderSchema = new Schema({
     ref: 'Product',
   },
   quantity: Number,
-  transactionId: {
-    type: Schema.Types.ObjectId,
-  },
   deliveryStatus: {
     type: String,
     enum: ['pending', 'shipped', 'delivered'],
