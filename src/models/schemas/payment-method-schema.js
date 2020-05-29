@@ -10,9 +10,10 @@ const PaymentMethodSchema = new Schema({
   methodId: {
     type: String,
     index: true,
+    unique: true,
   },
   methodType: String,
-  default: Boolean,
+  isDefault: Boolean,
 });
 
 module.exports = PaymentMethodSchema;

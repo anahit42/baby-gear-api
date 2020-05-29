@@ -18,8 +18,8 @@ class StripeLib {
    */
   async createCustomer(payload) {
     try {
-      const { email, name, phone } = payload;
-      return await this.stripe.customers.create({ email, name, phone });
+      const { email, name, phone, taxExempt, shipping } = payload;
+      return await this.stripe.customers.create({ email, name, phone, shipping, tex_exempt: taxExempt });
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }
@@ -44,6 +44,28 @@ class StripeLib {
       await this.stripe.paymentMethods.attach(createdCard.id, { customer: customerId });
 
       return createdCard;
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
+
+  /**
+   * @param { Object } payload
+   * @param { Object } payload.billingDetails
+   * @param { string } payload.methodId
+   */
+  async updatePaymentMethod(payload) {
+    try {
+      const { billingDetails, methodId, isDefaultMethod, customerId } = payload;
+      const updateData = {
+        billing_details: billingDetails,
+      };
+
+      if (isDefaultMethod) {
+        await this.setPaymentMethodAsDefault({ methodId, customerId });
+      }
+
+      return await this.stripe.paymentMethods.update(methodId, updateData);
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }
@@ -116,12 +138,19 @@ class StripeLib {
     }
   }
 
-  /**
-   * @param { string } invoiceId
-   */
   async getInvoiceById(invoiceId) {
     try {
       return await this.stripe.invoices.retrieve(invoiceId);
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
+
+  async deletePaymentMethod(payload) {
+    try {
+      const { methodId } = payload;
+
+      return await this.stripe.paymentMethods.detach(methodId);
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }
