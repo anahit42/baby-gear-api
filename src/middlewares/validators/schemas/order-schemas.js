@@ -15,7 +15,18 @@ const orderList = Joi.object({
   }),
 });
 
+const createOrder = Joi.object({
+  body: Joi.object({
+    paymentMethodId: string.hex().length(24),
+    products: Joi.array().items({
+      productId: string.hex().length(24).required(),
+      quantity: number.integer().positive().required(),
+    }).required(),
+  }),
+});
+
 module.exports = {
   orderGetSingle,
   orderList,
+  createOrder,
 };

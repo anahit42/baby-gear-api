@@ -1,5 +1,5 @@
 const { FavoritesModel } = require('../models');
-const { NotfoundError } = require('../errors');
+const { NotFoundError } = require('../errors');
 
 const { ResponseHandlerUtil } = require('../utils');
 
@@ -15,7 +15,7 @@ async function deleteFavorite(req, res, next) {
     }, { new: true });
 
     if (!favoriteData) {
-      throw new NotfoundError('Item not found');
+      throw new NotFoundError('Item not found');
     }
 
     return ResponseHandlerUtil.handleDelete(res);
@@ -51,7 +51,7 @@ async function addFavoriteProduct(req, res, next) {
     );
 
     if (!favoriteData) {
-      throw new NotfoundError('Not found');
+      throw new NotFoundError('Not found');
     }
 
     return ResponseHandlerUtil.handleCreate(res, favoriteData);
