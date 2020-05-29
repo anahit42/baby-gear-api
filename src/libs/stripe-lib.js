@@ -18,8 +18,8 @@ class StripeLib {
    */
   async createCustomer(payload) {
     try {
-      const { email, name, phone } = payload;
-      return await this.stripe.customers.create({ email, name, phone });
+      const { email, name, phone, taxExempt, shipping } = payload;
+      return await this.stripe.customers.create({ email, name, phone, shipping, tex_exempt: taxExempt });
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }
@@ -51,21 +51,21 @@ class StripeLib {
 
   /**
    * @param { Object } payload
-   * @param { Object } payload.card
    * @param { Object } payload.billingDetails
-   * @param { string } payload.type
-   * @param { string } payload.customerId
+   * @param { string } payload.methodId
    */
   async updatePaymentMethod(payload) {
     try {
-      const { billingDetails, methodId } = payload;
+      const { billingDetails, methodId, isDefaultMethod, customerId } = payload;
       const updateData = {
         billing_details: billingDetails,
       };
 
-      const createdCard = await this.stripe.paymentMethods.update(methodId, updateData);
+      if (isDefaultMethod) {
+        await this.setPaymentMethodAsDefault({ methodId, customerId });
+      }
 
-      return createdCard;
+      return await this.stripe.paymentMethods.update(methodId, updateData);
     } catch (error) {
       throw new PaymentError(error.message, error.statusCode);
     }

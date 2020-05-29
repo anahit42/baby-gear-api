@@ -14,7 +14,7 @@ const shippingAddressSchema = Joi.object({
 const billingAddressSchema = Joi.object({
   line1: Joi.string().trim().max(100),
   city: Joi.string().trim().max(100),
-  country: JoiStringExtension.string().countryCode(),
+  country: JoiStringExtension.string().countryCode().length(2),
   postal_code: Joi.string().trim().max(100),
 });
 
@@ -39,13 +39,18 @@ const createPaymentMethodSchema = Joi.object({
 });
 
 const updatePaymentMethodSchema = Joi.object({
-  billingDetails: Joi.object({
-    billingAddressSchema,
-    name: Joi.string().trim().max(100),
-    phone: JoiStringExtension.string().phoneNumber(),
-    email: Joi.string().trim().email(),
+  params: Joi.object({
+    paymentMethodId: Joi.string().hex().length(24),
   }),
-  isDefaultMethod: Joi.boolean(),
+  body: Joi.object({
+    billingDetails: Joi.object({
+      billingAddressSchema,
+      name: Joi.string().trim().max(100),
+      phone: JoiStringExtension.string().phoneNumber(),
+      email: Joi.string().trim().email(),
+    }),
+    isDefaultMethod: Joi.boolean(),
+  })
 });
 
 const paymentMethodIdSchema = Joi.object({
