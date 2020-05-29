@@ -9,7 +9,12 @@ function validateListOrders(req, res, next) {
   return ValidationHandlerUtil.validate(OrderSchemas.orderList, req, next);
 }
 
+function validateCreateOrder(req, res, next) {
+  return ValidationHandlerUtil.validate(OrderSchemas.createOrder, req, next);
+}
+
 module.exports = {
   validateGetOrder,
   validateListOrders,
+  validateCreateOrder,
 };
