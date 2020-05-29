@@ -1,5 +1,6 @@
 const { PaymentMethodModel, UserModel } = require('../models');
 const { ResponseHandlerUtil } = require('../utils');
+const { NotFoundError } = require('../errors');
 
 const StripeLib = require('../libs/stripe-lib');
 
@@ -64,6 +65,10 @@ async function deletePaymentMethod(req, res, next) {
     await StripeLib.deletePaymentMethod({ methodId });
 
     const method = await PaymentMethodModel.findOneAndDelete({ methodId });
+
+    if (!method) {
+      throw new NotFoundError('The payment method is not found');
+    }
 
     return ResponseHandlerUtil.handleDelete(res, method);
   } catch (error) {
