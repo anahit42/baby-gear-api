@@ -1,12 +1,11 @@
 const Promise = require('bluebird');
-const config = require('config');
-const { OrderModel, InvoiceModel, ProductModel, BucketModel, UserModel } = require('../models');
+
+const { OrderModel, UserModel } = require('../models');
 const { NotFoundError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
-const StripeLib = require('../libs/stripe-lib');
-// const { getUserPaymentMethod } = require('../libs/payment-lib');
 
-const stripeCurrency = config.get('stripeCurrency');
+const OrderLib = require('../libs/order-lib');
+
 async function getOrder(req, res, next) {
   const { orderId } = req.params;
 
@@ -39,88 +38,27 @@ async function getOrders(req, res, next) {
   }
 }
 
-async function updateBucket(userId, productId, price) {
-  const bucket = await BucketModel.findOneAndUpdate({ userId }, {
-    $pull: {
-      products: { productId },
-    },
-  }, { new: true }, async (err, result) => {
-    if (result) {
-      result.totalPrice -= price;
-      await result.save();
-    }
-  });
-  if (!bucket) {
-    throw new NotFoundError('Bucket item not found');
-  }
-}
-function reduceInvoiceItems(lines) {
-  return lines.data.reduce((invoiceItems, line) => {
-    const { id, amount, metadata } = line;
-    invoiceItems.push({
-      invoiceItemId: id,
-      amount,
-      metadata,
-    });
-    return invoiceItems;
-  }, []);
-}
-
 async function createOrder(req, res, next) {
-  const { products } = req.body;
+  const { products, paymentMethodId } = req.body;
   const userId = req.userData._id;
 
-  const { methodId } = '';// getUserPaymentMethod(req);
-  let countInvoiceItem = 0;
   try {
-    const user = await UserModel.findOne({ _id: userId });
+    const user = await UserModel.findOne({ _id: userId }).select('paymentCustomerId');
     const { paymentCustomerId } = user;
-    await Promise.map(products, async (product) => {
-      const { productId, quantity } = product;
-      const oneProduct = await ProductModel.findOne({ _id: productId, userId });
-      if (!oneProduct) {
-        throw new NotFoundError('Product not found');
-      }
-      const { status, price } = oneProduct;
-      if (status !== 'active') {
-        await updateBucket(userId, productId, price);
-      } else {
-        countInvoiceItem += 1;
-        const order = {
-          ownerId: userId,
-          productId,
-          quantity,
-        };
-        const createdOrder = await OrderModel.create(order);
-        await StripeLib.createInvoiceItem({
-          customerId: paymentCustomerId,
-          currency: stripeCurrency,
-          amount: price * quantity,
-          description: 'test',
-          metadata: { orderId: createdOrder._id.toString() },
-        });
-      }
+
+    await OrderLib.createOrdersAndInvoiceItems({
+      products,
+      userId,
+      paymentCustomerId,
     });
 
-    if (countInvoiceItem === 0) {
-      throw new NotFoundError('There is no order item');
-    }
-    const invoice = await StripeLib.createInvoice({
-      paymentMethodId: methodId,
-      customerId: paymentCustomerId,
-      description: 'test invoice',
-    });
-    const { lines, amount_due: totalPrice, id, paid, status } = invoice;
-    const items = reduceInvoiceItems(lines);
-    const invoiceOurDoc = await InvoiceModel.create({
+    const invoice = await OrderLib.createInvoice({
+      paymentMethodId,
+      paymentCustomerId,
       userId,
-      invoiceId: id,
-      totalPrice,
-      items,
-      status,
-      paid,
     });
-    return ResponseHandlerUtil.handleCreate(res, invoiceOurDoc);
+
+    return ResponseHandlerUtil.handleCreate(res, invoice);
   } catch (error) {
     return next(error);
   }
