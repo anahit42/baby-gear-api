@@ -115,6 +115,23 @@ class StripeLib {
       throw new PaymentError(error.message, error.statusCode);
     }
   }
+
+  /**
+   * @param { Object } payload
+   * @param { number } payload.limit
+   * @param { string } payload.startingAfter
+   */
+  async getInvoices(payload) {
+    try {
+      const { limit, startingAfter } = payload;
+      return await this.stripe.invoices.list({
+        limit,
+        starting_after: startingAfter,
+      });
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
 }
 
 module.exports = new StripeLib();

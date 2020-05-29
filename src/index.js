@@ -10,6 +10,10 @@ const mongodb = require('./storages/mongodb');
 
 mongodb.init();
 
+const cronJobs = require('./jobs');
+
+cronJobs.start();
+
 const { AuthMiddleware, QueryParserMiddleware, ErrorHandlerMiddleware } = require('./middlewares');
 
 const apiPort = config.get('api.port');
