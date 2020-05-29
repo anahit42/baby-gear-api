@@ -12,7 +12,8 @@ mongodb.init();
 
 const cronJobs = require('./jobs');
 
-cronJobs.start();
+// eslint-disable-next-line no-console
+cronJobs.start().catch(console.error);
 
 const { AuthMiddleware, QueryParserMiddleware, ErrorHandlerMiddleware } = require('./middlewares');
 

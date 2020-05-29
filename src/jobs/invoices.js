@@ -7,31 +7,27 @@ const { InvoiceModel, OrderModel, ProductModel } = require('../models');
  * @param { Object } payload
  * @param { Object } payload.productId
  * @param { Object } payload.orderQuantity
- * @param { Object } payload.invoiceStatus
+ * @param { Object } payload.orderStatus
  */
 async function updateProductStatus(payload) {
   try {
-    const { productId, orderQuantity, invoiceStatus } = payload;
-    const { productTotalQuantity, status } = await ProductModel.findOne(
-      { _id: productId }
-    )
-      .select('quantity', 'status');
-
-    let total = parseInt(productTotalQuantity, 10) - parseInt(orderQuantity, 10);
+    const { productId, orderQuantity, orderStatus } = payload;
+    const product = await ProductModel.findOne({ _id: productId }).select('quantity', 'status');
+    const { quantity, status } = product;
+    let total = quantity;
     let productStatus = status;
 
-    if (!['open', 'paid'].includes(invoiceStatus)) {
-      total = parseInt(productTotalQuantity, 10) + parseInt(orderQuantity, 10);
+    if (orderStatus === 'failed') {
+      total = quantity + orderQuantity;
     }
 
     if (total === 0) {
       productStatus = 'not-available';
     }
 
-    await ProductModel.findByIdAndUpdate(
-      { _id: productId },
-      { quantity: total, status: productStatus }
-    );
+    product.quantity = total;
+    product.status = productStatus;
+    await product.save();
   } catch (error) {
     throw new Error(error);
   }
@@ -46,49 +42,50 @@ function mappingOrderStatus(invoiceStatus) {
   case 'uncollectible':
     return 'failed';
   case 'void':
-    return 'failed';
-  case 'draft':
     return 'expired';
+  case 'draft':
+    return 'pending';
   default:
     return '';
   }
 }
 
+async function updateOrderInvoice(order) {
+  const { _id, ownerId, productId, quantity } = order;
+
+  const invoiceDoc = await InvoiceModel.findOne({ userId: ownerId, 'items.metadata.orderId': _id })
+    .select('invoiceId');
+
+  const { invoiceId } = invoiceDoc;
+
+  const invoice = await StripeLib.getInvoiceById(invoiceId);
+  const { status: invoiceStatus, paid } = invoice;
+
+  invoiceDoc.paid = paid;
+  invoiceDoc.status = invoiceStatus;
+  order.status = mappingOrderStatus(invoiceStatus);
+
+  await Promise.all([
+    invoiceDoc.save(),
+    order.save(),
+  ]);
+
+  await updateProductStatus({
+    productId,
+    orderStatus: order.status,
+    orderQuantity: quantity,
+  });
+}
+
 async function updateInvoices(job) {
   try {
     const { lastRunAt } = job.attrs;
-    const updatableOrders = await OrderModel.find({
+    const orders = await OrderModel.find({
       status: 'pending',
       createdAt: { $gte: lastRunAt, $lte: Date.now() },
     });
 
-    await Promise.map(updatableOrders, async (order) => {
-      const { _id, ownerId, productId, quantity: orderQuantity } = order;
-
-      const { invoiceId } = await InvoiceModel.findOne(
-        { userId: ownerId, 'items.metadata.orderId': _id }
-      )
-        .select('invoiceId');
-
-      const invoice = await StripeLib.getInvoiceById(invoiceId);
-      const { status: invoiceStatus, paid } = invoice;
-
-      await InvoiceModel.findByIdAndUpdate(
-        { invoiceId },
-        { paid, status: invoiceStatus }
-      );
-
-      await OrderModel.findByIdAndUpdate(
-        { _id },
-        { status: mappingOrderStatus(invoiceStatus) }
-      );
-
-      await updateProductStatus({
-        productId,
-        orderQuantity,
-        invoiceStatus,
-      });
-    }, { concurrency: 5 });
+    await Promise.map(orders, async (order) => updateOrderInvoice(order), { concurrency: 5 });
   } catch (error) {
     // TODO: Log error.
     // eslint-disable-next-line no-console
