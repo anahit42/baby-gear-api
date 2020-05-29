@@ -50,7 +50,7 @@ const updatePaymentMethodSchema = Joi.object({
       email: Joi.string().trim().email(),
     }),
     isDefaultMethod: Joi.boolean(),
-  })
+  }),
 });
 
 const paymentMethodIdSchema = Joi.object({

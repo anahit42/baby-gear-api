@@ -104,7 +104,7 @@ async function updateUserPaymentMethod(req, res, next) {
       methodId,
       billingDetails,
       isDefaultMethod,
-      customerId: paymentCustomerId
+      customerId: paymentCustomerId,
     });
 
     return ResponseHandlerUtil.handleCreate(res, paymentMethodDoc);
