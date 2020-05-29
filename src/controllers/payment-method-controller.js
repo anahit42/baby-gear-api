@@ -10,8 +10,6 @@ async function createPaymentMethod(req, res, next) {
   try {
     const { card, type, shippingDetails } = req.body;
     let { isDefaultMethod } = req.body;
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(req.body));
     const userId = req.userData._id;
 
     const user = await UserModel.findOne({ _id: userId });
