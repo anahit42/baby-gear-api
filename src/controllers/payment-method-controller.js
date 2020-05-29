@@ -57,7 +57,6 @@ async function createPaymentMethod(req, res, next) {
   }
 }
 
-
 async function deletePaymentMethod(req, res, next) {
   const { methodId } = req.params;
 
