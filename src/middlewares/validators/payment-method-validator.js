@@ -9,12 +9,12 @@ function validateUpdatePaymentMethod(req, res, next) {
   return ValidationHandlerUtil.validate(PaymentMethodSchemas.updatePaymentMethodSchema, req, next);
 }
 
-function validateMethodId(req, res, next) {
-  return ValidationHandlerUtil.validate(PaymentMethodSchemas.methodIdSchema, req, next);
+function validatePaymentMethodId(req, res, next) {
+  return ValidationHandlerUtil.validate(PaymentMethodSchemas.paymentMethodIdSchema, req, next);
 }
 
 module.exports = {
   validateCreatePaymentMethod,
   validateUpdatePaymentMethod,
-  validateMethodId,
+  validatePaymentMethodId,
 };

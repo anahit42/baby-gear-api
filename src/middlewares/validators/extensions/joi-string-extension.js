@@ -29,17 +29,6 @@ const JoiStringExtension = Joi.extend((joi) => ({
         return value;
       },
     },
-    methodId: {
-      validate(value, helpers) {
-        const regexPattern = new RegExp('^pm_([A-Fa-f0-9]{24})$');
-
-        if (!regexPattern.test(value)) {
-          return helpers.error('string.methodId');
-        }
-
-        return value;
-      },
-    },
   },
 }));
 

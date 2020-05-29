@@ -48,9 +48,9 @@ const updatePaymentMethodSchema = Joi.object({
   isDefaultMethod: Joi.boolean(),
 });
 
-const methodIdSchema = Joi.object({
+const paymentMethodIdSchema = Joi.object({
   params: Joi.object({
-    methodId: JoiStringExtension.string().methodId(),
+    paymentMethodId: Joi.string().hex().length(24),
   }),
 });
 
@@ -58,5 +58,5 @@ const methodIdSchema = Joi.object({
 module.exports = {
   createPaymentMethodSchema,
   updatePaymentMethodSchema,
-  methodIdSchema,
+  paymentMethodIdSchema,
 };

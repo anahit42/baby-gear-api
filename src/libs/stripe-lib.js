@@ -58,10 +58,12 @@ class StripeLib {
    */
   async updatePaymentMethod(payload) {
     try {
-      const { billingDetails } = payload;
-      const createdCard = await this.stripe.paymentMethods.update({
+      const { billingDetails, methodId } = payload;
+      const updateData = {
         billing_details: billingDetails,
-      });
+      };
+
+      const createdCard = await this.stripe.paymentMethods.update(methodId, updateData);
 
       return createdCard;
     } catch (error) {

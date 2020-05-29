@@ -1,13 +1,17 @@
+const { getCode } = require('country-list');
 const { PaymentMethodModel, UserModel } = require('../models');
 const { ResponseHandlerUtil } = require('../utils');
-const { NotFoundError } = require('../errors/not-found-error');
-const { MethodNotAllowedError } = require('../errors/method-not-allowed');
+const NotFoundError = require('../errors/not-found-error');
+const MethodNotAllowedError = require('../errors/method-not-allowed');
 
 const StripeLib = require('../libs/stripe-lib');
 
 async function createPaymentMethod(req, res, next) {
   try {
-    const { card, type, isDefaultMethod, shippingDetails } = req.body;
+    const { card, type, shippingDetails } = req.body;
+    let { isDefaultMethod } = req.body;
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(req.body));
     const userId = req.userData._id;
 
     const user = await UserModel.findOne({ _id: userId });
@@ -35,7 +39,7 @@ async function createPaymentMethod(req, res, next) {
         address: {
           line1: user.address.street,
           city: user.address.city,
-          country: user.address.country,
+          country: getCode(user.address.country),
           postal_code: user.address.zipCode,
         },
         name: `${user.firstName} ${user.lastName}`,
@@ -45,9 +49,12 @@ async function createPaymentMethod(req, res, next) {
     });
 
     const methodId = paymentMethod.id;
+    const hasDefaultCard = await PaymentMethodModel.exists({ userId, isDefault: true });
 
-    if (isDefaultMethod) {
+    if (isDefaultMethod && !hasDefaultCard) {
       await StripeLib.setPaymentMethodAsDefault({ methodId, customerId });
+    } else {
+      isDefaultMethod = false;
     }
 
     const paymentMethodDoc = await PaymentMethodModel.create({
@@ -66,13 +73,13 @@ async function createPaymentMethod(req, res, next) {
 async function updateUserPaymentMethod(req, res, next) {
   try {
     const { isDefaultMethod, billingDetails } = req.body;
-    const { methodId } = req.params;
+    const { paymentMethodId } = req.params;
     const userId = req.userData._id;
 
-    const { isDefault } = await PaymentMethodModel.findOne({ userId, methodId });
-
-    if (!isDefault) {
-      throw NotFoundError(`The payment method with id = ${methodId} not found.`);
+    const paymentMethodDoc = await PaymentMethodModel.findOne({ _id: paymentMethodId });
+    const { isDefault } = paymentMethodDoc;
+    if (!paymentMethodDoc) {
+      throw new NotFoundError(`The payment method with id = ${paymentMethodId} not found.`);
     }
 
     if (!isDefaultMethod || isDefault) {
@@ -80,12 +87,11 @@ async function updateUserPaymentMethod(req, res, next) {
     }
 
     const inDbPaymentMethod = await PaymentMethodModel.findOneAndUpdate({
-      userId,
-      methodId }, { isDefault, billingDetails });
-
+      _id: paymentMethodId }, { isDefault, billingDetails });
+    const { methodId } = inDbPaymentMethod;
     await PaymentMethodModel.findOneAndUpdate({ userId, isDefault: isDefaultMethod }, { isDefault: false });
 
-    await StripeLib.updatePaymentMethod({ billingDetails });
+    await StripeLib.updatePaymentMethod({ methodId, billingDetails });
 
     const { paymentCustomerId } = await UserModel.findOne({ _id: userId });
     await StripeLib.setPaymentMethodAsDefault({ methodId, customerId: paymentCustomerId });
