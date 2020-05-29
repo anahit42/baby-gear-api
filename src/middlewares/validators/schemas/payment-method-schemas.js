@@ -18,6 +18,13 @@ const createPaymentMethodSchema = Joi.object({
   }),
 });
 
+const getPaymentMethodSchema = Joi.object({
+  params: Joi.object({
+    methodId: Joi.string().required(),
+  }),
+});
+
 module.exports = {
   createPaymentMethodSchema,
+  getPaymentMethodSchema,
 };

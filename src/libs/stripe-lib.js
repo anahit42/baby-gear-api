@@ -115,6 +115,20 @@ class StripeLib {
       throw new PaymentError(error.message, error.statusCode);
     }
   }
+
+  /**
+   * @param { Object } payload
+   * @param { string } payload.methodId
+   */
+  async deletePaymentMethod(payload) {
+    try {
+      const { methodId } = payload;
+
+      return await this.stripe.paymentMethods.detach(methodId);
+    } catch (error) {
+      throw new PaymentError(error.message, error.statusCode);
+    }
+  }
 }
 
 module.exports = new StripeLib();
