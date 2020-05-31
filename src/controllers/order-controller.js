@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const { OrderModel, UserModel } = require('../models');
 const { NotFoundError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
+const { ForbiddenError } = require('../errors');
 
 const OrderLib = require('../libs/order-lib');
 
@@ -64,8 +65,33 @@ async function createOrder(req, res, next) {
   }
 }
 
+async function updateDeliveryStatus(req, res, next) {
+  const { orderId } = req.params;
+
+  try {
+    const findQuery = { _id: orderId };
+    const order = await OrderModel.findOne(findQuery).select('ownerId');
+
+    if (!order) {
+      throw new NotFoundError('Order not found');
+    }
+
+    if (String(order.ownerId) !== req.userData._id) {
+      throw new ForbiddenError('Not Authorized!');
+    }
+
+    const { deliveryStatus } = req.body;
+    const updatedOrder = await OrderModel.updateOne(findQuery, { deliveryStatus });
+
+    return ResponseHandlerUtil.handleUpdate(res, updatedOrder);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getOrder,
   getOrders,
   createOrder,
+  updateDeliveryStatus,
 };

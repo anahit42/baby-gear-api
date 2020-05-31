@@ -25,8 +25,15 @@ const createOrder = Joi.object({
   }),
 });
 
+const orderIdSchema = Joi.object({
+  params: Joi.object({
+    orderId: Joi.string().hex().length(24),
+  }),
+});
+
 module.exports = {
   orderGetSingle,
   orderList,
   createOrder,
+  orderIdSchema,
 };
