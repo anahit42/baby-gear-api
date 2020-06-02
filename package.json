@@ -44,6 +44,7 @@
   },
   "scripts": {
     "fixpack": "fixpack",
+    "index-products": "node src/scripts/indexing.js",
     "lint": "node ./node_modules/eslint/bin/eslint.js ./src --fix",
     "precommit": "node ./node_modules/eslint/bin/eslint.js ./src",
     "start": "node src/index.js",

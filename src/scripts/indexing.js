@@ -8,10 +8,10 @@ const mongodb = require('../storages/mongodb');
 mongodb.init();
 
 const ElasticSearchLib = require('../libs/elastic-search-lib');
+const ProductsModel = require('../models/product-model');
 
 async function start() {
   // eslint-disable-next-line global-require
-  const ProductsModel = require('../models/product-model');
 
   const products = await ProductsModel.find();
   await ElasticSearchLib.dropProductsIndex();
@@ -24,10 +24,12 @@ async function start() {
       name,
       images,
     });
-  });
+  }, { concurrency: 10 });
 }
 
 setTimeout(() => {
-  // eslint-disable-next-line no-console
-  start().then(console.log).catch(console.error);
+  start()
+    .then(() => process.exit())
+    // eslint-disable-next-line no-console
+    .catch((error) => console.error(error));
 }, 1000);
