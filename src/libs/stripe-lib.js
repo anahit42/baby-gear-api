@@ -120,7 +120,6 @@ class StripeLib {
    */
   async createInvoice(payload) {
     try {
-
       const { customerId, description, metadata, methodId } = payload;
       const invoice = await this.stripe.invoices.create({
         customer: customerId,
