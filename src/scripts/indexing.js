@@ -11,12 +11,10 @@ const ElasticSearchLib = require('../libs/elastic-search-lib');
 const ProductsModel = require('../models/product-model');
 
 async function start() {
-  // eslint-disable-next-line global-require
-
-  const products = await ProductsModel.find();
   await ElasticSearchLib.dropProductsIndex();
   await ElasticSearchLib.createProductsIndex();
 
+  const products = await ProductsModel.find();
   await Promise.map(products, (product) => {
     const { _id, name, images } = product;
     return ElasticSearchLib.indexProduct({
