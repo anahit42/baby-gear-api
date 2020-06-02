@@ -27,6 +27,10 @@ const UserSchema = new Schema({
     country: String,
     city: String,
   },
+  shipping_address: {
+    name: String,
+    phone: String,
+  },
   isActive: Boolean,
   paymentCustomerId: String,
 }, { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } });
