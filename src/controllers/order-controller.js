@@ -64,8 +64,37 @@ async function createOrder(req, res, next) {
   }
 }
 
+async function complainOrder(req, res, next) {
+  const { orderId } = req.params;
+  const { complaints } = req.body;
+
+  try {
+    const order = await OrderModel.findOne({ _id: orderId });
+    const { deliveryStatus } = order;
+
+    if (!order) {
+      throw new NotFoundError('Order not found');
+    }
+
+    if (deliveryStatus !== 'shipped' && deliveryStatus !== 'delivered') {
+      throw new NotFoundError('This Order type is not allowed');
+    }
+
+    const updatedOrder = await OrderModel.findOneAndUpdate(
+      { _id: orderId },
+      { complaints },
+      { new: true }
+    );
+
+    return ResponseHandlerUtil.handleGet(res, updatedOrder);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getOrder,
   getOrders,
   createOrder,
+  complainOrder,
 };

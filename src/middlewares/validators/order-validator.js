@@ -13,8 +13,13 @@ function validateCreateOrder(req, res, next) {
   return ValidationHandlerUtil.validate(OrderSchemas.createOrder, req, next);
 }
 
+function validateOrderComplaints(req, res, next) {
+  return ValidationHandlerUtil.validate(OrderSchemas.complainOrder, req, next);
+}
+
 module.exports = {
   validateGetOrder,
   validateListOrders,
   validateCreateOrder,
+  validateOrderComplaints,
 };
