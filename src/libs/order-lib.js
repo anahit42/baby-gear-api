@@ -24,7 +24,6 @@ class OrderLib {
 
   static async updateBucket(payload) {
     const { userId, productIds, decreaseAmount } = payload;
-
     return BucketModel.findOneAndUpdate({ userId }, {
       $pull: {
         products: { productId: { $in: productIds } },
