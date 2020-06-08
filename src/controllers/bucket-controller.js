@@ -1,9 +1,9 @@
 const Promise = require('bluebird');
+
 const { BucketModel, ProductModel } = require('../models');
 const { ForbiddenError, NotFoundError, ValidationError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
 const OrderLib = require('../libs/order-lib');
-
 
 async function getBucket(req, res, next) {
   const { userId } = req.params;

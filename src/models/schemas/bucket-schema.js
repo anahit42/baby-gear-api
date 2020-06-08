@@ -14,7 +14,10 @@ const BucketSchema = new Schema({
     },
     quantity: Number,
   }],
-  totalPrice: Number,
+  totalPrice: {
+    type: Number,
+    default: 0,
+  },
 });
 
 module.exports = BucketSchema;

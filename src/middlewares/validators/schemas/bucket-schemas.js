@@ -6,7 +6,7 @@ const bucketIdSchema = Joi.object({
   }),
 });
 
-const addProductToBucketSchemas = Joi.object({
+const addProductToBucketSchema = Joi.object({
   body: Joi.object({
     productId: Joi.string().hex().length(24).required(),
     quantity: Joi.number().integer().positive().required(),
@@ -18,4 +18,5 @@ const addProductToBucketSchemas = Joi.object({
 
 module.exports = {
   bucketIdSchema,
-  addProductToBucketSchemas };
+  addProductToBucketSchema,
+};
