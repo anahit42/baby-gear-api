@@ -22,28 +22,37 @@ async function getBucket(req, res, next) {
   }
 }
 
-async function removeBucket(req, res, next) {
+async function updateBucket(req, res, next) {
   const { productIds } = req.body;
   const { userId } = req.params;
+
   try {
     if (userId !== req.userData._id) {
       throw new ForbiddenError('You\'re not allowed to view this resource');
     }
-    const prductsRemoveFromBucket = await BucketModel.findOne({ userId }).populate('products.productId');
-    if (prductsRemoveFromBucket.products.length) {
-      let decreaseAmount = 0;
-      await Promise.map(prductsRemoveFromBucket.products, async (product) => {
-        decreaseAmount += product.productId.price * product.quantity;
-      });
-      await OrderLib.updateBucket({
-        userId,
-        productIds,
-        decreaseAmount,
-      });
-    }
 
-    return ResponseHandlerUtil.handleDelete(res, { data: {
-      prductsRemoveFromBucket } });
+    const bucket = await BucketModel.findOne({
+      userId,
+      'products.productId': {
+        $in: productIds,
+      },
+    }).populate('products.productId');
+
+    let decreaseAmount = 0;
+
+    await Promise.map(bucket.products, async (product) => {
+      if (productIds.includes(product.productId._id.toString())) {
+        decreaseAmount += product.productId.price * product.quantity;
+      }
+    });
+
+    await OrderLib.updateBucket({
+      userId,
+      productIds,
+      decreaseAmount,
+    });
+
+    return ResponseHandlerUtil.handleDelete(res, bucket);
   } catch (error) {
     return next(error);
   }
@@ -105,6 +114,6 @@ async function addProductToBucket(req, res, next) {
 
 module.exports = {
   getBucket,
-  removeBucket,
+  updateBucket,
   addProductToBucket,
 };
