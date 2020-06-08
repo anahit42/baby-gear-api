@@ -6,9 +6,15 @@ const condition = config.get('validation.product.condition');
 
 const { string, number, date } = Joi.types();
 
-const productIdSchemas = Joi.object({
+const productIdSchema = Joi.object({
   params: Joi.object({
     productId: Joi.string().hex().length(24).required(),
+  }),
+});
+
+const productSearchSchema = Joi.object({
+  query: Joi.object({
+    q: Joi.string().required(),
   }),
 });
 
@@ -62,7 +68,8 @@ const productsUpdateSchema = Joi.object({
 });
 
 module.exports = {
-  productIdSchemas,
+  productIdSchema,
   productsCreateSchema,
   productsUpdateSchema,
+  productSearchSchema,
 };

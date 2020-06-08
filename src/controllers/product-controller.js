@@ -3,6 +3,8 @@ const FileType = require('file-type');
 const Promise = require('bluebird');
 
 const S3Lib = require('../libs/s3-lib');
+const ElasticSearchLib = require('../libs/elastic-search-lib');
+
 const { ProductModel } = require('../models');
 const { NotFoundError, ForbiddenError } = require('../errors');
 const { CommonUtil, ResponseHandlerUtil } = require('../utils');
@@ -215,6 +217,18 @@ async function deleteProduct(req, res, next) {
   }
 }
 
+async function searchProduct(req, res, next) {
+  const { q } = req.query;
+
+  try {
+    const { total, data } = await ElasticSearchLib.searchProduct(q);
+
+    return ResponseHandlerUtil.handleList(res, data, total);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   createProduct,
   updateProduct,
@@ -223,4 +237,5 @@ module.exports = {
   getUserProducts,
   uploadImages,
   deleteProduct,
+  searchProduct,
 };

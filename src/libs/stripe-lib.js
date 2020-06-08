@@ -120,12 +120,13 @@ class StripeLib {
    */
   async createInvoice(payload) {
     try {
-      const { customerId, description, metadata } = payload;
+      const { customerId, description, metadata, methodId } = payload;
       const invoice = await this.stripe.invoices.create({
         customer: customerId,
         collection_method: 'charge_automatically',
         auto_advance: true,
         description,
+        default_payment_method: methodId,
         metadata,
       });
 

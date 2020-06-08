@@ -31,5 +31,8 @@
   "image": {
     "validMimes": [ "image/jpeg", "image/png", "image/svg+xml", "image/gif", "image/webp" ]
   },
-  "stripeCurrency" : "USD"
+  "stripeCurrency" : "USD",
+  "elasticSearch": {
+    "productsIndex": "products"
+  }
 }
