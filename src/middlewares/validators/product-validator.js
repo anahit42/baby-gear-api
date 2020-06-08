@@ -10,11 +10,16 @@ function validateUpdateProduct(req, res, next) {
 }
 
 function validateProductId(req, res, next) {
-  return ValidationHandlerUtil.validate(ProductSchemas.productIdSchemas, req, next);
+  return ValidationHandlerUtil.validate(ProductSchemas.productIdSchema, req, next);
+}
+
+function validateProductSearch(req, res, next) {
+  return ValidationHandlerUtil.validate(ProductSchemas.productSearchSchema, req, next);
 }
 
 module.exports = {
   validateProductId,
   validateCreateProduct,
   validateUpdateProduct,
+  validateProductSearch,
 };

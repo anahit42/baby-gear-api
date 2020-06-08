@@ -92,13 +92,9 @@ async function updateUserPaymentMethod(req, res, next) {
     }
 
     if (!isDefaultMethod) {
-      const otherDefaultMethod = await PaymentMethodModel.exists({ userId, isDefault: true });
-
-      if (!otherDefaultMethod) {
-        throw new ConflictError('You need to have at leas one default payment method..');
-      }
+      throw new ConflictError('You need to have at leas one default payment method..');
     } else {
-      await PaymentMethodModel.updateMany({ userId, isDefault: true }, { isDefault: false });
+      await PaymentMethodModel.updateOne({ userId, isDefault: true }, { isDefault: false });
     }
 
     paymentMethodDoc.isDefault = isDefault;

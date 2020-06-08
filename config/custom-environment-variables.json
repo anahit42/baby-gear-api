@@ -15,5 +15,10 @@
   },
   "stripe": {
     "secretKey": "STRIPE_SECRET_KEY"
+  },
+  "elasticSearch": {
+    "host": "ES_HOST",
+    "password": "ES_PASSWORD",
+    "username": "ES_USERNAME"
   }
 }

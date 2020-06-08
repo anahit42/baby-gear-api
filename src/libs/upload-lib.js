@@ -3,8 +3,8 @@ const S3Lib = require('./s3-lib');
 
 const { accessKeyId, secretAccessKey, bucketName } = config.get('aws');
 
-async function uploadAndUpdateModelItem(playload, ItemModel) {
-  const { file, fileType, _id, updateField } = playload;
+async function uploadAndUpdateModelItem(payload, ItemModel) {
+  const { file, fileType, _id, updateField } = payload;
 
   const data = await S3Lib.uploadFileToS3({
     bucket: bucketName,
@@ -27,4 +27,6 @@ async function uploadAndUpdateModelItem(playload, ItemModel) {
   });
 }
 
-module.exports = { uploadAndUpdateModelItem };
+module.exports = {
+  uploadAndUpdateModelItem,
+};
