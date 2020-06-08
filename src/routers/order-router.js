@@ -6,19 +6,22 @@ const {
   validateGetOrder,
   validateListOrders,
   validateCreateOrder,
-  validateOrderComplaints,
+  validateCreateOrderComplaint,
+  validateUpdateDeliveryStatusSchema,
 } = require('../middlewares/validators/order-validator');
+
 
 const {
   getOrder,
   getOrders,
   createOrder,
-  complainOrder,
+  updateDeliveryStatus,
+  createOrderComplaint,
 } = require('../controllers/order-controller');
 
 router.get('/', validateListOrders, getOrders);
 router.post('/', validateCreateOrder, createOrder);
 router.get('/:orderId', validateGetOrder, getOrder);
-router.post('/:orderId/complaints', validateOrderComplaints, complainOrder);
-
+router.post('/:orderId/complaints', validateCreateOrderComplaint, createOrderComplaint);
+router.patch('/:orderId/delivery', validateUpdateDeliveryStatusSchema, updateDeliveryStatus);
 module.exports = router;

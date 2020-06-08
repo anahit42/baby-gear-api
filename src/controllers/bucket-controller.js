@@ -1,7 +1,62 @@
-const { BucketModel, ProductModel } = require('../models');
-const { NotFoundError, ValidationError } = require('../errors');
+const Promise = require('bluebird');
 
+const { BucketModel, ProductModel } = require('../models');
+const { ForbiddenError, NotFoundError, ValidationError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
+const OrderLib = require('../libs/order-lib');
+
+async function getBucket(req, res, next) {
+  const { userId } = req.params;
+  try {
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('You\'re not allowed to view this resource');
+    }
+    const userBucket = await BucketModel.findOne({ userId }).populate('products.productId');
+    if (!userBucket) {
+      throw new NotFoundError(`Bucket for user with id = ${userId} not found.`);
+    }
+
+    return ResponseHandlerUtil.handleGet(res, userBucket);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateBucket(req, res, next) {
+  const { productIds } = req.body;
+  const { userId } = req.params;
+
+  try {
+    if (userId !== req.userData._id) {
+      throw new ForbiddenError('You\'re not allowed to view this resource');
+    }
+
+    const bucket = await BucketModel.findOne({
+      userId,
+      'products.productId': {
+        $in: productIds,
+      },
+    }).populate('products.productId');
+
+    let decreaseAmount = 0;
+
+    await Promise.map(bucket.products, async (product) => {
+      if (productIds.includes(product.productId._id.toString())) {
+        decreaseAmount += product.productId.price * product.quantity;
+      }
+    });
+
+    await OrderLib.updateBucket({
+      userId,
+      productIds,
+      decreaseAmount,
+    });
+
+    return ResponseHandlerUtil.handleDelete(res, bucket);
+  } catch (error) {
+    return next(error);
+  }
+}
 
 async function addProductToBucket(req, res, next) {
   const { productId, quantity } = req.body;
@@ -24,7 +79,16 @@ async function addProductToBucket(req, res, next) {
 
     const currentBucketData = await BucketModel.findOne({ userId });
     if (!currentBucketData) {
-      throw new NotFoundError('Not found');
+      const createData = {
+        userId,
+        products: [{
+          productId,
+          quantity,
+        }],
+        totalPrice: quantity * product.price,
+      };
+      const bucketDoc = await BucketModel.create(createData);
+      return ResponseHandlerUtil.handleCreate(res, bucketDoc);
     }
 
     const pickedProduct = currentBucketData.products.find(
@@ -49,5 +113,7 @@ async function addProductToBucket(req, res, next) {
 }
 
 module.exports = {
+  getBucket,
+  updateBucket,
   addProductToBucket,
 };
