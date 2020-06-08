@@ -28,6 +28,9 @@
     },
     "paymentTypes": ["card"],
     "order": {
+      "complaints": {
+        "reason": ["productQuality", "failedDelivery"]
+      },
       "deliveryStatus": ["pending", "shipped", "delivered"]
     }
   },

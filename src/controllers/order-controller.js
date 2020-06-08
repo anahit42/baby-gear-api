@@ -1,9 +1,8 @@
 const Promise = require('bluebird');
 
 const { OrderModel, UserModel } = require('../models');
-const { NotFoundError } = require('../errors');
 const { ResponseHandlerUtil } = require('../utils');
-const { ForbiddenError } = require('../errors');
+const { ForbiddenError, ConflictError, NotFoundError } = require('../errors');
 
 const OrderLib = require('../libs/order-lib');
 
@@ -65,6 +64,33 @@ async function createOrder(req, res, next) {
   }
 }
 
+async function createOrderComplaint(req, res, next) {
+  const { orderId } = req.params;
+  const { complaints } = req.body;
+  const userId = req.userData._id;
+
+  try {
+    const order = await OrderModel.findOne({ _id: orderId, userId });
+
+    if (!order) {
+      throw new NotFoundError('Order not found');
+    }
+
+    const { deliveryStatus } = order;
+
+    if (!['shipped', 'delivered'].includes(deliveryStatus)) {
+      throw new ConflictError('Order complaints can be created for shipped or delivered orders.');
+    }
+
+    order.complaints = complaints;
+    await order.save();
+
+    return ResponseHandlerUtil.handleGet(res, order);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 async function updateDeliveryStatus(req, res, next) {
   const { orderId } = req.params;
   const { deliveryStatus } = req.body;
@@ -94,5 +120,6 @@ module.exports = {
   getOrder,
   getOrders,
   createOrder,
+  createOrderComplaint,
   updateDeliveryStatus,
 };
