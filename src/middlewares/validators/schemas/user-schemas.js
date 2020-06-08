@@ -8,6 +8,11 @@ const addressSchema = Joi.object({
   city: Joi.string().trim().max(100).required(),
 });
 
+const shippingSchema = Joi.object({
+  name: Joi.string().trim().max(100).required(),
+  phone: Joi.string().trim().max(100).required(),
+});
+
 const registerUserSchema = Joi.object({
   body: Joi.object({
     firstName: Joi.string().trim().max(100).required(),
@@ -16,6 +21,7 @@ const registerUserSchema = Joi.object({
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{5,30}$')).required(),
     mobilePhone: JoiStringExtension.string().phoneNumber().required(),
     address: addressSchema.required(),
+    shipping: shippingSchema,
   }),
 });
 

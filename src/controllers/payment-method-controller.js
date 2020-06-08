@@ -12,6 +12,7 @@ async function createPaymentMethod(req, res, next) {
 
     const user = await UserModel.findOne({ _id: userId });
 
+
     if (!user.paymentCustomerId) {
       const customer = await StripeLib.createCustomer({
         email: user.email,
@@ -22,6 +23,11 @@ async function createPaymentMethod(req, res, next) {
       });
 
       user.paymentCustomerId = customer.id;
+      await user.save();
+    }
+
+    if (shipping) {
+      user.shippingAddress = shipping;
       await user.save();
     }
 
