@@ -67,23 +67,24 @@ async function createOrder(req, res, next) {
 
 async function updateDeliveryStatus(req, res, next) {
   const { orderId } = req.params;
+  const { deliveryStatus } = req.body;
+  const userId = req.userData._id;
 
   try {
-    const findQuery = { _id: orderId };
-    const order = await OrderModel.findOne(findQuery).select('ownerId');
+    const order = await OrderModel.findOne({ _id: orderId }).populate('productId');
 
     if (!order) {
       throw new NotFoundError('Order not found');
     }
 
-    if (String(order.ownerId) !== req.userData._id) {
-      throw new ForbiddenError('Not Authorized!');
+    if (order.productId.userId.toString() !== userId) {
+      throw new ForbiddenError('Delivery status can be updated by product creator.');
     }
 
-    const { deliveryStatus } = req.body;
-    const updatedOrder = await OrderModel.updateOne(findQuery, { deliveryStatus });
+    order.deliveryStatus = deliveryStatus;
+    await order.save();
 
-    return ResponseHandlerUtil.handleUpdate(res, updatedOrder);
+    return ResponseHandlerUtil.handleUpdate(res, order);
   } catch (error) {
     return next(error);
   }
