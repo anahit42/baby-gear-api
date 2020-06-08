@@ -1,4 +1,7 @@
 const Joi = require('@hapi/joi');
+const config = require('config');
+
+const deliveryStatus = config.get('validation.order.deliveryStatus');
 
 const { string, number } = Joi.types();
 
@@ -25,8 +28,25 @@ const createOrder = Joi.object({
   }),
 });
 
+const orderIdSchema = Joi.object({
+  params: Joi.object({
+    orderId: Joi.string().hex().length(24),
+  }),
+});
+
+const deliveryStatusSchema = Joi.object({
+  params: Joi.object({
+    orderId: Joi.string().hex().length(24),
+  }),
+  body: Joi.object({
+    deliveryStatus: Joi.string().valid(...deliveryStatus).required(),
+  }),
+});
+
 module.exports = {
   orderGetSingle,
   orderList,
   createOrder,
+  orderIdSchema,
+  deliveryStatusSchema,
 };
