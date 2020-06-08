@@ -27,7 +27,8 @@ const UserSchema = new Schema({
     country: String,
     city: String,
   },
-  shipping_address: {
+  shippingAddress: {
+    address: Schema.Types.Mixed,
     name: String,
     phone: String,
   },

@@ -22,13 +22,12 @@ async function createPaymentMethod(req, res, next) {
         shipping,
       });
 
-
       user.paymentCustomerId = customer.id;
       await user.save();
     }
 
     if (shipping) {
-      user.shipping_address = shipping;
+      user.shippingAddress = shipping;
       await user.save();
     }
 
